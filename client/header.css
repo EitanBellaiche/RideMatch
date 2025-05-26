@@ -1,10 +1,10 @@
+/* HEADER בסיסי */
 .main-header {
   background-color: #1E293B;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #334155;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -17,19 +17,54 @@
   text-decoration: none;
 }
 
-.logo:hover {
-  color: #FACC15;
+/* קישורים רגילים */
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
 }
-
 
 .nav-links a {
   color: #E2E8F0;
   text-decoration: none;
-  margin-left: 1.5rem;
   font-weight: 500;
   transition: color 0.3s;
 }
 
 .nav-links a:hover {
   color: #FACC15;
+}
+
+/* כפתור המבורגר */
+.menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: white;
+}
+
+/* תפריט רספונסיבי */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    background-color: #1E293B;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 100%;
+    padding: 1rem 2rem;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #334155;
+  }
 }

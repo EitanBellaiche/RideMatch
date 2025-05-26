@@ -25,4 +25,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     messageArea.textContent = "שגיאה בשרת.";
     messageArea.style.color = "#F87171";
   }
+
 });
+
+
