@@ -4,28 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>דף הבית - RideMatch</title>
-  <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="header.css" />
-
+  <link rel="stylesheet" href="home.css" />
 </head>
+
 <body>
   <header class="main-header">
-    <div class="logo">🚗 RideMatch</div>
+    <a href="home.html" class="logo">🚗 RideMatch</a>
     <nav class="nav-links">
-      <a href="#">הנסיעות שלי</a>
-      <a href="#">התשלומים שלי</a>
-      <a href="#">הפרופיל שלי</a>
+      <a href="home.html">דף הבית</a>
+      <a href="my-trips.html">הנסיעות שלי</a>
+      <a href="my-payments.html">התשלומים שלי</a>
+      <a href="my-profile.html">הפרופיל שלי</a>
     </nav>
   </header>
 
   <main>
     <section class="welcome-banner">
-      <h1>ברוך הבא ל RideMatch</h1>
+      <h1>ברוך הבא ל-RideMatch</h1>
       <p>מצא את הנסיעה שלך לאירוע הקרוב בלחיצה אחת</p>
     </section>
 
     <section class="search-container">
       <input type="text" placeholder="חפש אירועים לפי שם או מיקום..." />
+    </section>
+
+    <!-- כפתור הוספת אירוע חדש -->
+    <section class="add-event-button">
+      <a href="add-event.html" class="event-button">➕ הוסף אירוע חדש</a>
     </section>
 
     <section class="events-section">
@@ -37,7 +43,6 @@
           <p>📍 פארק הירקון | 🕒 שבת 21:00</p>
         </div>
         <a href="event-details.html" class="details-button">צפה בפרטים</a>
-
       </div>
 
       <div class="event-card">

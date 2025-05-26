@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  direction: rtl;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.payments-section {
+  margin-bottom: 3rem;
+}
+
+.payments-section h2 {
+  color: #FACC15;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.payment-card {
+  background-color: #1E293B;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.payment-card p {
+  margin: 0.3rem 0;
+  color: #CBD5E1;
+}
+
+.payment-card button {
+  margin-top: 1rem;
+  padding: 10px 18px;
+  background-color: #06B6D4;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.payment-card button:hover {
+  background-color: #0891B2;
+}
