@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  direction: rtl;
+}
+
+main {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.welcome-banner {
+  background-color: #1E293B;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.welcome-banner h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #FACC15;
+}
+
+.welcome-banner p {
+  margin-top: 0.5rem;
+  color: #94A3B8;
+}
+
+.search-container {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.search-container input {
+  width: 100%;
+  max-width: 500px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  background-color: #1E293B;
+  color: white;
+  box-shadow: inset 0 0 5px rgba(255,255,255,0.1);
+}
+
+.events-section h2 {
+  color: #FACC15;
+  margin-bottom: 1rem;
+}
+
+.event-card {
+  background-color: #1E293B;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.event-info h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #93C5FD;
+}
+
+.event-info p {
+  margin: 0.5rem 0 0;
+  color: #94A3B8;
+}
+
+.event-card button {
+  background-color: #06B6D4;
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.event-card button:hover {
+  background-color: #0891B2;
+}
