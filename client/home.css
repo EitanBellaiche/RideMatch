@@ -94,3 +94,18 @@ main {
 .event-card button:hover {
   background-color: #0891B2;
 }
+.details-button {
+  display: inline-block;
+  background-color: #06B6D4;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  font-size: 0.95rem;
+}
+
+.details-button:hover {
+  background-color: #0891B2;
+}

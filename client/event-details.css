@@ -1,0 +1,108 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  direction: rtl;
+}
+
+.event-header {
+  background-color: #1E293B;
+  padding: 2rem;
+  border-radius: 12px;
+  margin: 2rem auto;
+  max-width: 900px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.event-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #93C5FD;
+}
+
+.event-header p {
+  margin-top: 0.5rem;
+  color: #94A3B8;
+  font-size: 1rem;
+}
+
+.drivers-section {
+  max-width: 900px;
+  margin: auto;
+  padding: 0 2rem 2rem;
+}
+
+.drivers-section h2 {
+  color: #FACC15;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0.5rem;
+}
+
+.driver-card {
+  background-color: #1E293B;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.driver-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.driver-info h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  color: #60A5FA;
+}
+
+.driver-info p {
+  margin: 0.3rem 0;
+  color: #CBD5E1;
+  font-size: 0.95rem;
+}
+
+.driver-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  min-width: 160px;
+}
+
+.primary-button {
+  background-color: #06B6D4;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #0891B2;
+}
+
+.secondary-button {
+  background-color: #334155;
+  color: #E2E8F0;
+}
+
+.secondary-button:hover {
+  background-color: #475569;
+}
