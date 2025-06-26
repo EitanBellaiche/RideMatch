@@ -1,21 +1,19 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const pool = require('./db');
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
-
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-
-  // דוגמה בסיסית בלבד
-  if (username === "admin" && password === "1234") {
-    res.json({ message: "התחברת בהצלחה!" });
-  } else {
-    res.status(401).json({ message: "שם משתמש או סיסמה שגויים" });
+app.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.send(`✅ Connected to DB. Time: ${result.rows[0].now}`);
+  } catch (err) {
+    console.error('❌ DB error:', err);
+    res.status(500).send('DB error');
   }
 });
 
-app.listen(3000, () => {
-  console.log("port running in http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
