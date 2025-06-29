@@ -18,7 +18,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       messageArea.textContent = data.message;
       messageArea.style.color = "#22C55E";
       setTimeout(() => {
-        window.location.href = "index.html";
+        window.location.href = "home.html";
       }, 1000);
     } else {
       messageArea.textContent = data.message;
