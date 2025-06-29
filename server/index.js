@@ -40,6 +40,16 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/events', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM events');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ message: "Server error while fetching events" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
