@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
       navLinks.classList.toggle("active");
     });
 
-    // סגירת תפריט כשנלחץ על קישור
+ 
     document.querySelectorAll("#navLinks a").forEach(link => {
       link.addEventListener("click", () => {
         navLinks.classList.remove("active");

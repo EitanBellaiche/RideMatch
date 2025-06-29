@@ -1,4 +1,4 @@
-/* HEADER בסיסי */
+
 .main-header {
   background-color: #1E293B;
   padding: 1rem 2rem;
@@ -17,7 +17,7 @@
   text-decoration: none;
 }
 
-/* קישורים רגילים */
+
 .nav-links {
   display: flex;
   gap: 1.5rem;
@@ -34,15 +34,17 @@
   color: #FACC15;
 }
 
-/* כפתור המבורגר */
 .menu-toggle {
   display: none;
-  font-size: 1.8rem;
+  font-size: 2rem; 
   cursor: pointer;
-  color: white;
+  color: white; 
+  background-color: transparent;
+  border: none;
 }
 
-/* תפריט רספונסיבי */
+
+
 @media (max-width: 768px) {
   .menu-toggle {
     display: block;
