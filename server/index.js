@@ -12,13 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
 app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.send(`Connected to DB. Time: ${result.rows[0].now}`);
-  } catch (err) {
-    console.error('DB error:', err);
-    res.status(500).send('DB error');
-  }
+  res.sendFile(path.join(__dirname, '..', 'client', 'login.html'));
 });
 
 app.post('/login', async (req, res) => {
