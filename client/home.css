@@ -109,24 +109,5 @@ main {
 .details-button:hover {
   background-color: #0891B2;
 }
-.add-event-button {
-  text-align: center;
-  margin: 2rem 0;
-}
-
-.event-button {
-  background-color: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  font-size: 1rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-.event-button:hover {
-  background-color: #16A34A;
-}
 
 

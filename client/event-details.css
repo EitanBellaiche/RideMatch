@@ -106,3 +106,31 @@ body {
 .secondary-button:hover {
   background-color: #475569;
 }
+
+.add-driver-button {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.driver-button {
+  display: inline-block;
+  background-color: #22C55E; /* ירוק */
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.driver-button:hover {
+  background-color: #16A34A; /* ירוק כהה יותר */
+}
+
+
+
+
+
+
+
