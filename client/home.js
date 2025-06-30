@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const eventsSection = document.querySelector(".events-section");
+  const eventsGrid = document.querySelector(".events-grid");
 
   try {
     const res = await fetch("https://ridematch-a905.onrender.com/events");
     const events = await res.json();
 
-    eventsSection.innerHTML = "<h2>אירועים השבוע</h2>";
+    eventsGrid.innerHTML = "";
 
     events.forEach(event => {
       const article = document.createElement("article");
@@ -19,10 +19,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <a href="event-details.html" class="details-button">צפה בפרטים</a>
       `;
 
-      eventsSection.appendChild(article);
+      eventsGrid.appendChild(article);
     });
   } catch (err) {
     console.error("Failed to load events:", err);
-    eventsSection.innerHTML += "<p>אירעה שגיאה בטעינת האירועים.</p>";
+    eventsGrid.innerHTML = "<p>אירעה שגיאה בטעינת האירועים.</p>";
   }
 });
