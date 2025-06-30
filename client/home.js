@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const eventsSection = document.querySelector(".events-section");
 
   try {
-    const res = await fetch("/events");
+    const res = await fetch("https://ridematch-a905.onrender.com/events");
     const events = await res.json();
 
     eventsSection.innerHTML = "<h2>אירועים השבוע</h2>";
