@@ -16,7 +16,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           <h3>${event.title}</h3>
           <p>📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
         </header>
-        <a href="event-details.html" class="details-button">צפה בפרטים</a>
+        <a href="event-details.html?id=${event.id}" class="details-button">צפה בפרטים</a>
+
       `;
 
       eventsGrid.appendChild(article);
