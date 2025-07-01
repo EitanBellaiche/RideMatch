@@ -12,8 +12,8 @@ app.use(express.json());
 // static files
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
-// redirect index.html -> home.html
-app.get('/index.html', (req, res) => {
+// redirect login.html -> home.html
+app.get('/login.html', (req, res) => {
   res.redirect('/home.html');
 });
 
