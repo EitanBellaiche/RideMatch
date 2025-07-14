@@ -9,20 +9,20 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// static files
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
-// redirect index.html -> home.html
-app.get('/index.html', (req, res) => {
-  res.redirect('/home.html');
-});
-
-// login page
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'login.html'));
 });
 
-// login route
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'login.html'));
+});
+
+app.get('/home.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'home.html'));
+});
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -43,7 +43,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// get all events
 app.get('/events', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM events');
@@ -54,7 +53,6 @@ app.get('/events', async (req, res) => {
   }
 });
 
-// get event by id + drivers
 app.get('/events/:id', async (req, res) => {
   const eventId = req.params.id;
 
@@ -91,7 +89,6 @@ app.get('/events/:id', async (req, res) => {
   }
 });
 
-// start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
