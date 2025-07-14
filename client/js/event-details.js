@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-const res = await fetch(`https://ridematch-a905.onrender.com/events/${eventId}`);
+    const res = await fetch(`https://ridematch-a905.onrender.com/events/${eventId}`);
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
@@ -18,7 +18,6 @@ const res = await fetch(`https://ridematch-a905.onrender.com/events/${eventId}`)
     const data = await res.json();
     console.log("Response data:", data); // בדיקה שהתשובה מגיעה תקינה
 
-    // בדיקה אם יש אירוע
     if (!data.event) {
       console.error("No event data found");
       document.querySelector(".event-header h1").innerText = "אירוע לא נמצא";
@@ -27,38 +26,38 @@ const res = await fetch(`https://ridematch-a905.onrender.com/events/${eventId}`)
 
     // עדכון כותרת האירוע
     document.querySelector(".event-header h1").innerText = data.event.title;
-    document.querySelector(".event-header p").innerText = `📍 ${data.event.location} | 🕒 ${data.event.day} ${data.event.time}`;
+    document.querySelector(".event-header p").innerText =
+      `📍 ${data.event.location} | 🕒 ${data.event.day} ${data.event.time}`;
 
-    // עדכון רשימת נהגים
-    const driversSection = document.querySelector(".drivers-section");
-    driversSection.innerHTML = "<h2>נהגים שנוסעים לאירוע</h2>";
+    // עדכון אזור הנהגים
+    const driversList = document.querySelector(".drivers-list");
+    driversList.innerHTML = ""; // ניקוי קודם
 
-    // אם אין נהגים כלל
-    if (data.drivers.length === 0) {
-      driversSection.innerHTML += "<p>אין נהגים זמינים כרגע לאירוע זה.</p>";
+    if (!data.drivers || data.drivers.length === 0) {
+      driversList.innerHTML = "<p>אין נהגים זמינים כרגע לאירוע זה.</p>";
+    } else {
+      data.drivers.forEach(driver => {
+        const article = document.createElement("article");
+        article.classList.add("driver-card");
+
+        article.innerHTML = `
+          <header class="driver-info">
+            <h3>${driver.username}</h3>
+            <p>⏰ יציאה: ${driver.departure_time}</p>
+            <p>💸 מחיר: ${driver.price} ש"ח</p>
+            <p>🚘 רכב: ${driver.car_model}, ${driver.car_color}</p>
+            <p>📍 מקום איסוף: ${driver.pickup_location}</p>
+            <p>🪑 מקומות פנויים: ${driver.seats_available}</p>
+          </header>
+          <footer class="driver-actions">
+            <button class="primary-button">שלח הודעה</button>
+            <button class="secondary-button">הזמנת נסיעה</button>
+          </footer>
+        `;
+
+        driversList.appendChild(article);
+      });
     }
-
-    data.drivers.forEach(driver => {
-      const article = document.createElement("article");
-      article.classList.add("driver-card");
-
-      article.innerHTML = `
-        <header class="driver-info">
-          <h3>${driver.username}</h3>
-          <p>⏰ יציאה: ${driver.departure_time}</p>
-          <p>💸 מחיר: ${driver.price} ש"ח</p>
-          <p>🚘 רכב: ${driver.car_model}, ${driver.car_color}</p>
-          <p>📍 מקום איסוף: ${driver.pickup_location}</p>
-          <p>🪑 מקומות פנויים: ${driver.seats_available}</p>
-        </header>
-        <footer class="driver-actions">
-          <button class="primary-button">שלח הודעה</button>
-          <button class="secondary-button">הזמנת נסיעה</button>
-        </footer>
-      `;
-
-      driversSection.appendChild(article);
-    });
 
   } catch (err) {
     console.error("Failed to load event details:", err);
