@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הוסף את עצמך כנהג</title>
+  <link rel="stylesheet" href="css/header.css" />
+  <link rel="stylesheet" href="css/add-event.css" />
+</head>
+<body>
+  <header class="main-header">
+    <span class="logo">🚗 RideMatch</span>
+    <nav class="nav-links">
+      <a href="home.html">דף הבית</a>
+      <a href="my-trips.html">הנסיעות שלי</a>
+      <a href="my-payments.html">התשלומים שלי</a>
+      <a href="my-profile.html">הפרופיל שלי</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <h2>פרטי נהג</h2>
+      <p style="color:#94A3B8; font-size:0.95rem; margin-top:-1rem; text-align:center;">
+        מלא את פרטיך כדי שנוכל להוסיף אותך כנהג באירוע.
+      </p>
+      <form id="addDriverForm">
+        <label for="departure_time">⏰ שעת יציאה:</label>
+        <input type="time" id="departure_time" name="departure_time" required />
+
+        <label for="price">💸 מחיר לנוסע (₪):</label>
+        <input type="number" id="price" name="price" placeholder="לדוג': 20" required />
+
+        <label for="car_model">🚘 דגם רכב:</label>
+        <input type="text" id="car_model" name="car_model" placeholder="לדוג': Toyota Corolla" required />
+
+        <label for="car_color">🎨 צבע רכב:</label>
+        <input type="text" id="car_color" name="car_color" placeholder="לדוג': לבן" required />
+
+        <label for="pickup_location">📍 מקום איסוף:</label>
+        <input type="text" id="pickup_location" name="pickup_location" placeholder="לדוג': תחנת רכבת ת״א השלום" required />
+
+        <label for="seats_available">🪑 מספר מקומות פנויים:</label>
+        <input type="number" id="seats_available" name="seats_available" placeholder="לדוג': 3" required />
+
+        <button type="submit">שמור והוסף אותי כנהג</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/add-driver.js"></script>
+</body>
+</html>
