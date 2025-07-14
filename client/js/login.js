@@ -17,6 +17,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     if (res.ok) {
       messageArea.textContent = data.message;
       messageArea.style.color = "#22C55E";
+      localStorage.setItem("username", username);
+
+      
       setTimeout(() => {
         window.location.href = "home.html";
       }, 1000);

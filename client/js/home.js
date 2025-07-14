@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  
+  const greetingEl = document.getElementById("greeting");
+  const username = localStorage.getItem("username");
+  if (username && greetingEl) {
+    greetingEl.textContent = `שלום ${username}`;
+  }
+  
   const eventsGrid = document.querySelector(".events-grid");
 
   try {
