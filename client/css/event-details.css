@@ -280,11 +280,13 @@ body {
 .driver-button:hover {
   background-color: #16A34A; /* ירוק כהה יותר */
 }
-
-
-
-
-
+.driver-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
 
 
 

@@ -35,7 +35,7 @@ app.post('/login', async (req, res) => {
     if (result.rows.length > 0) {
       res.status(200).json({
         message: "Login successful",
-        user_id: result.rows[0].id 
+        user_id: result.rows[0].id
       });
     } else {
       res.status(401).json({ message: "Invalid username or password" });
@@ -105,12 +105,20 @@ app.post('/add-driver', async (req, res) => {
   }
 });
 
-    app.get('/drivers/:eventId', async (req, res) => {
+app.get('/drivers/:eventId', async (req, res) => {
   const eventId = req.params.eventId;
 
   try {
     const driversResult = await pool.query(
-      `SELECT u.username, ed.departure_time, ed.price, ed.car_model, ed.car_color, ed.pickup_location, ed.seats_available
+      `SELECT 
+         u.id AS driver_user_id,
+         u.username, 
+         ed.departure_time, 
+         ed.price, 
+         ed.car_model, 
+         ed.car_color, 
+         ed.pickup_location, 
+         ed.seats_available
        FROM users u
        JOIN event_drivers ed ON u.id = ed.user_id
        WHERE ed.event_id = $1`,
@@ -123,6 +131,40 @@ app.post('/add-driver', async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשרת בקבלת הנהגים' });
   }
 });
+
+
+app.post('/join-ride', async (req, res) => {
+  const { event_id, driver_user_id, passenger_user_id } = req.body;
+
+  if (!event_id || !driver_user_id || !passenger_user_id) {
+    return res.status(400).json({ message: "חסרים שדות נדרשים" });
+  }
+
+  try {
+    const exists = await pool.query(
+      `SELECT * FROM event_passengers 
+       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3`,
+      [event_id, driver_user_id, passenger_user_id]
+    );
+
+    if (exists.rows.length > 0) {
+      return res.status(409).json({ message: "כבר נרשמת לנסיעה הזו" });
+    }
+
+    await pool.query(
+      `INSERT INTO event_passengers (event_id, driver_user_id, passenger_user_id)
+       VALUES ($1, $2, $3)`,
+      [event_id, driver_user_id, passenger_user_id]
+    );
+
+    res.status(200).json({ message: "נרשמת בהצלחה לנסיעה!" });
+
+  } catch (err) {
+    console.error("שגיאה בהרשמה לנסיעה:", err);
+    res.status(500).json({ message: "שגיאה בשרת בהרשמה לנסיעה" });
+  }
+});
+
 
 
 app.listen(PORT, () => {

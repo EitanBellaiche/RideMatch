@@ -37,11 +37,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         driverCard.innerHTML = `
           <h3>${driver.username}</h3>
+
           <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
           <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
           <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
           <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
           <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
+
+          <div class="driver-actions">
+            <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
+            <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id})">🚗 הרשמה לנסיעה</button>
+          </div>
         `;
 
         driversListContainer.appendChild(driverCard);
@@ -52,3 +58,38 @@ document.addEventListener("DOMContentLoaded", () => {
       driversListContainer.innerHTML = "<p>שגיאה בטעינת הנהגים מהשרת.</p>";
     });
 });
+
+// פונקציה לשליחת הודעה (עתידית)
+function sendMessageToDriver(username) {
+  alert(`בעתיד תתווסף מערכת הודעות מול ${username}`);
+}
+
+// פונקציה להרשמה לנסיעה
+function registerToRide(eventId, driverUserId) {
+  const passengerUserId = localStorage.getItem("user_id");
+
+  if (!passengerUserId) {
+    alert("עליך להתחבר כדי להירשם לנסיעה.");
+    return;
+  }
+
+  fetch("https://ridematch-a905.onrender.com/join-ride", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      event_id: eventId,
+      driver_user_id: driverUserId,
+      passenger_user_id: passengerUserId
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+    })
+    .catch(err => {
+      console.error("שגיאה בהרשמה:", err);
+      alert("שגיאה בעת ההרשמה לנסיעה");
+    });
+}
