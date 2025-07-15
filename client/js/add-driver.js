@@ -1,12 +1,48 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addDriverForm");
+  const driversContainer = document.getElementById("driversList"); // ודא שיש אלמנט כזה ב־HTML
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const eventId = urlParams.get("id");
+  const userId = localStorage.getItem("user_id");
+
+  // אם חסר eventId – לא טוען כלום
+  if (!eventId) {
+    alert("לא נמצא מזהה אירוע ב־URL");
+    return;
+  }
+
+  // 🟦 שלב 1: הצגת הנהגים באירוע
+  fetch(`https://ridematch-a905.onrender.com/drivers/${eventId}`)
+    .then(res => res.json())
+    .then(drivers => {
+      if (!drivers.length) {
+        driversContainer.innerHTML = "<p>אין עדיין נהגים לאירוע הזה.</p>";
+        return;
+      }
+
+      drivers.forEach(driver => {
+        const driverDiv = document.createElement("div");
+        driverDiv.classList.add("driver-card");
+        driverDiv.innerHTML = `
+          <p><strong>${driver.username}</strong></p>
+          <p>⏰ שעת יציאה: ${driver.departure_time}</p>
+          <p>🚘 רכב: ${driver.car_model} (${driver.car_color})</p>
+          <p>📍 מקום איסוף: ${driver.pickup_location}</p>
+          <p>💸 מחיר לנוסע: ${driver.price} ₪</p>
+          <p>🪑 מקומות פנויים: ${driver.seats_available}</p>
+        `;
+        driversContainer.appendChild(driverDiv);
+      });
+    })
+    .catch(err => {
+      console.error("שגיאה בקבלת הנהגים:", err);
+      driversContainer.innerHTML = "<p>שגיאה בטעינת הנהגים.</p>";
+    });
+
+  // 🟩 שלב 2: הוספת נהג חדש בטופס
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get("id");
-    const userId = localStorage.getItem("user_id"); // ודא ששמרת את זה ב־login
 
     if (!eventId || !userId) {
       alert("משהו השתבש - חסר מזהה אירוע או משתמש.");
