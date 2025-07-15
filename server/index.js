@@ -166,8 +166,8 @@ app.post('/join-ride', async (req, res) => {
     // הוספה עם status = 'paid'
     await pool.query(
       `INSERT INTO event_passengers 
-       (event_id, driver_user_id, passenger_user_id, status)
-       VALUES ($1, $2, $3, 'paid')`,
+   (event_id, driver_user_id, passenger_user_id, status)
+   VALUES ($1, $2, $3, 'pending')`,
       [event_id, driver_user_id, passenger_user_id]
     );
 
@@ -229,6 +229,84 @@ app.get('/passenger-trips', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
+
+app.get('/driver-requests', async (req, res) => {
+  const { event_id, driver_user_id } = req.query;
+
+  if (!event_id || !driver_user_id) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        ep.passenger_user_id,
+        u.username,
+        ep.status
+      FROM event_passengers ep
+      JOIN users u ON ep.passenger_user_id = u.id
+      WHERE ep.event_id = $1 AND ep.driver_user_id = $2 AND ep.status = 'pending'
+    `, [event_id, driver_user_id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("שגיאה בקבלת בקשות הצטרפות:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+app.post('/approve-passenger', async (req, res) => {
+  const { event_id, driver_user_id, passenger_user_id } = req.body;
+
+  if (!event_id || !driver_user_id || !passenger_user_id) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+
+  try {
+    // עדכון הסטטוס ל־'paid'
+    await pool.query(`
+      UPDATE event_passengers
+      SET status = 'paid'
+      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
+    `, [event_id, driver_user_id, passenger_user_id]);
+
+    // הפחתת מקומות במידה ולא ירדו עדיין
+    await pool.query(`
+      UPDATE event_drivers
+      SET seats_available = seats_available - 1
+      WHERE event_id = $1 AND user_id = $2 AND seats_available > 0
+    `, [event_id, driver_user_id]);
+
+    res.status(200).json({ message: "נוסע אושר בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה באישור נוסע:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
+app.get('/check-registration', async (req, res) => {
+  const { event_id, driver_user_id, passenger_user_id } = req.query;
+
+  if (!event_id || !driver_user_id || !passenger_user_id) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT status FROM event_passengers
+      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
+    `, [event_id, driver_user_id, passenger_user_id]);
+
+    if (result.rows.length > 0) {
+      return res.status(200).json({ status: result.rows[0].status });
+    } else {
+      return res.status(200).json({ status: null }); // לא רשום
+    }
+  } catch (err) {
+    console.error("שגיאה בבדיקת הרשמה:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

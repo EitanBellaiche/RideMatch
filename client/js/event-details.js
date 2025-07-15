@@ -28,25 +28,50 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      drivers.forEach(driver => {
+      drivers.forEach(async driver => {
         const driverCard = document.createElement("div");
         driverCard.classList.add("driver-card");
 
+        let status = null;
+
+        // שלב חדש: בדוק אם המשתמש כבר נרשם לנסיעה זו
+        try {
+          const checkRes = await fetch(`https://ridematch-a905.onrender.com/check-registration?event_id=${event.id}&driver_user_id=${driver.driver_user_id}&passenger_user_id=${currentUserId}`);
+          const checkData = await checkRes.json();
+          if (checkRes.ok) {
+            status = checkData.status; // יכול להיות 'pending', 'paid', או null
+          }
+        } catch (e) {
+          console.error("שגיאה בבדיקת הרשמה מוקדמת:", e);
+        }
+
+        // תוכן הכפתור בהתאם לסטטוס
+        let buttonHTML = "";
+
+        if (status === "paid") {
+          buttonHTML = `<button class="disabled-button" disabled>✅ רשום לנסיעה</button>`;
+        } else if (status === "pending") {
+          buttonHTML = `<button class="disabled-button" disabled>⏳ ממתין לאישור</button>`;
+        } else {
+          buttonHTML = `<button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הירשם לנסיעה</button>`;
+        }
+
         driverCard.innerHTML = `
-          <h3>${driver.username}</h3>
-          <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
-          <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
-          <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
-          <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
-          <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
-          <div class="driver-actions">
-            <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
-            <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הירשם לנסיעה</button>
-          </div>
-        `;
+    <h3>${driver.username}</h3>
+    <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
+    <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
+    <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
+    <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
+    <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
+    <div class="driver-actions">
+      <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
+      ${buttonHTML}
+    </div>
+  `;
 
         driversListContainer.appendChild(driverCard);
       });
+
     });
 });
 
