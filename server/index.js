@@ -187,102 +187,6 @@ app.post('/join-ride', async (req, res) => {
   }
 });
 
-
-app.post('/approve-passenger', async (req, res) => {
-  const { event_id, driver_user_id, passenger_user_id } = req.body;
-
-  try {
-    const result = await pool.query(
-      `UPDATE event_passengers
-       SET status = 'approved'
-       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3 AND status = 'pending'`,
-      [event_id, driver_user_id, passenger_user_id]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: "לא נמצאה בקשה או שכבר אושרה" });
-    }
-
-    res.status(200).json({ message: "הנוסע אושר. כעת הוא יכול לשלם." });
-  } catch (err) {
-    console.error("שגיאה באישור נוסע:", err);
-    res.status(500).json({ message: "שגיאה באישור" });
-  }
-});
-
-app.post('/confirm-payment', async (req, res) => {
-  const { event_id, driver_user_id, passenger_user_id } = req.body;
-
-  try {
-    const result = await pool.query(
-      `UPDATE event_passengers
-       SET status = 'paid'
-       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3 AND status = 'approved'`,
-      [event_id, driver_user_id, passenger_user_id]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(400).json({ message: "הנוסע לא אושר עדיין או כבר שילם" });
-    }
-
-    // הפחתת מקומות פנויים
-    await pool.query(
-      `UPDATE event_drivers
-       SET seats_available = seats_available - 1
-       WHERE event_id = $1 AND user_id = $2 AND seats_available > 0`,
-      [event_id, driver_user_id]
-    );
-
-    res.status(200).json({ message: "התשלום הצליח. הצטרפת לנסיעה!" });
-  } catch (err) {
-    console.error("שגיאה בתשלום:", err);
-    res.status(500).json({ message: "שגיאה בשרת באישור תשלום" });
-  }
-});
-
-app.get('/pending-passengers/:eventId', async (req, res) => {
-  const { eventId } = req.params;
-  const { driver_id } = req.query;
-
-  try {
-    const result = await pool.query(
-      `SELECT u.id AS passenger_user_id, u.username
-       FROM event_passengers ep
-       JOIN users u ON ep.passenger_user_id = u.id
-       WHERE ep.event_id = $1 AND ep.driver_user_id = $2 AND ep.status = 'pending'`,
-      [eventId, driver_id]
-    );
-
-    res.status(200).json(result.rows);
-  } catch (err) {
-    console.error("שגיאה בקבלת נוסעים ממתינים:", err);
-    res.status(500).json({ message: "שגיאה בשרת" });
-  }
-});
-app.get('/passenger-status/:eventId', async (req, res) => {
-  const { eventId } = req.params;
-  const { user_id } = req.query;
-
-  try {
-    const result = await pool.query(
-      `SELECT status, driver_user_id
-       FROM event_passengers
-       WHERE event_id = $1 AND passenger_user_id = $2
-       ORDER BY id DESC LIMIT 1`,
-      [eventId, user_id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "לא נמצאה הרשמה לאירוע זה" });
-    }
-
-    res.status(200).json(result.rows[0]);
-  } catch (err) {
-    console.error("שגיאה בקבלת סטטוס נוסע:", err);
-    res.status(500).json({ message: "שגיאה בשרת" });
-  }
-});
-
 // נסיעות כנהג
 app.get('/driver-trips', async (req, res) => {
   const { user_id } = req.query;
@@ -301,7 +205,6 @@ app.get('/driver-trips', async (req, res) => {
   }
 });
 
-// נסיעות כמשתתף
 app.get('/passenger-trips', async (req, res) => {
   const { user_id } = req.query;
   try {
@@ -317,7 +220,7 @@ app.get('/passenger-trips', async (req, res) => {
       JOIN events e ON ep.event_id = e.id
       JOIN event_drivers ed ON ep.driver_user_id = ed.user_id AND ep.event_id = ed.event_id
       JOIN users u ON ed.user_id = u.id
-      WHERE ep.passenger_user_id = $1 AND ep.status = 'paid'
+      WHERE ep.passenger_user_id = $1
     `, [user_id]);
 
     res.json(result.rows);
