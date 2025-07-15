@@ -48,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (status === "paid") {
           buttonHTML = `<button class="disabled-button" disabled>✅ רשום לנסיעה</button>`;
+        } else if (status === "approved") {
+          buttonHTML = `<button class="pay-button" onclick="startPaymentProcess(this, ${event.id}, ${driver.driver_user_id})">💳 אושרת, שלם בבקשה</button>`;
         } else if (status === "pending") {
           buttonHTML = `<button class="disabled-button" disabled>⏳ ממתין לאישור</button>`;
         } else {
@@ -116,4 +118,46 @@ function registerToRide(eventId, driverUserId, buttonElement) {
       buttonElement.classList.remove("disabled-button");
       buttonElement.classList.add("secondary-button");
     });
+}
+
+function startPaymentProcess(buttonElement, eventId, driverUserId) {
+  const passengerUserId = localStorage.getItem("user_id");
+
+  if (!passengerUserId) {
+    alert("עליך להתחבר כדי לשלם.");
+    return;
+  }
+
+  buttonElement.disabled = true;
+  buttonElement.textContent = "🔄 מעבד תשלום...";
+
+  setTimeout(() => {
+    fetch("https://ridematch-a905.onrender.com/confirm-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: eventId,
+        driver_user_id: driverUserId,
+        passenger_user_id: passengerUserId
+      })
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (res.ok) {
+          buttonElement.textContent = "✅ רשום לנסיעה";
+          buttonElement.classList.remove("pay-button");
+          buttonElement.classList.add("disabled-button");
+        } else {
+          buttonElement.textContent = "💳 אושרת, שלם בבקשה";
+          buttonElement.disabled = false;
+          alert(data.message || "שגיאה בעיבוד תשלום");
+        }
+      })
+      .catch(err => {
+        console.error("שגיאה ברשת:", err);
+        buttonElement.textContent = "💳 אושרת, שלם בבקשה";
+        buttonElement.disabled = false;
+        alert("שגיאת רשת. נסה שוב.");
+      });
+  }, 2000);
 }

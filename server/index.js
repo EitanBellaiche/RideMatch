@@ -265,7 +265,7 @@ app.post('/approve-passenger', async (req, res) => {
     // עדכון הסטטוס ל־'paid'
     await pool.query(`
       UPDATE event_passengers
-      SET status = 'paid'
+SET status = 'approved'
       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
     `, [event_id, driver_user_id, passenger_user_id]);
 
@@ -304,6 +304,27 @@ app.get('/check-registration', async (req, res) => {
   } catch (err) {
     console.error("שגיאה בבדיקת הרשמה:", err);
     res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
+app.post('/confirm-payment', async (req, res) => {
+  const { event_id, driver_user_id, passenger_user_id } = req.body;
+
+  if (!event_id || !driver_user_id || !passenger_user_id) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+
+  try {
+    await pool.query(`
+      UPDATE event_passengers
+      SET status = 'paid'
+      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3 AND status = 'approved'
+    `, [event_id, driver_user_id, passenger_user_id]);
+
+    res.status(200).json({ message: "התשלום אושר והנוסע נוסף לנסיעה" });
+  } catch (err) {
+    console.error("שגיאה באישור תשלום:", err);
+    res.status(500).json({ message: "שגיאה בשרת בעת אישור התשלום" });
   }
 });
 
