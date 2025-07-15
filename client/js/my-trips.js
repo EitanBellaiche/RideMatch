@@ -1,70 +1,83 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const userId = localStorage.getItem("user_id");
-
   if (!userId) {
     alert("לא מחובר");
     window.location.href = "login.html";
     return;
   }
 
-  // ברירת מחדל: הצג נסיעות כנהג
-  loadTrips("driver");
+  const driverSection = document.createElement("section");
+  driverSection.className = "trip-section driver-trips";
+  driverSection.innerHTML = "<h2>🔵 נסיעות כנהג</h2>";
 
-  document.getElementById("driverView").addEventListener("click", () => {
-    loadTrips("driver");
-  });
+  const passengerSection = document.createElement("section");
+  passengerSection.className = "trip-section passenger-trips";
+  passengerSection.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
 
-  document.getElementById("passengerView").addEventListener("click", () => {
-    loadTrips("passenger");
-  });
+  document.querySelector("main").appendChild(driverSection);
+  document.querySelector("main").appendChild(passengerSection);
+
+  loadDriverTrips(userId, driverSection);
+  loadPassengerTrips(userId, passengerSection);
 });
 
-const baseUrl = "https://ridematch-a905.onrender.com"; // ודא שזו כתובת השרת שלך
+const baseUrl = "https://ridematch-a905.onrender.com";
 
-async function loadTrips(role) {
-  const userId = localStorage.getItem("user_id");
-  if (!userId) return;
-
-  const upcomingSection = document.querySelector(".trip-section.upcoming");
-  upcomingSection.innerHTML = "<h2>🟢 נסיעות מתוכננות</h2>";
-
-  const endpoint = role === "driver"
-    ? `${baseUrl}/driver-trips`
-    : `${baseUrl}/passenger-trips`;
-
+async function loadDriverTrips(userId, container) {
   try {
-    const response = await fetch(`${endpoint}?user_id=${userId}`);
-    if (!response.ok) throw new Error("Network response was not ok");
+    const res = await fetch(`${baseUrl}/driver-trips?user_id=${userId}`);
+    if (!res.ok) throw new Error("בעיה בטעינת נסיעות כנהג");
+    const trips = await res.json();
 
-    const trips = await response.json();
-    const now = new Date();
-    let hasUpcoming = false;
-
-    trips.forEach(trip => {
-      const tripDateTime = new Date(`${trip.date}T${trip.time}`);
-      if (tripDateTime >= now) {
-        const tripCard = document.createElement("article");
-        tripCard.classList.add("trip-card");
-
-        tripCard.innerHTML = `
-          <h3>${trip.title}</h3>
-          <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
-          <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
-          <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-          <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
-        `;
-
-        upcomingSection.appendChild(tripCard);
-        hasUpcoming = true;
-      }
-    });
-
-    if (!hasUpcoming) {
-      upcomingSection.innerHTML += "<p>לא נמצאו נסיעות מתוכננות</p>";
+    if (trips.length === 0) {
+      container.innerHTML += "<p>אין נסיעות שאתה נהג בהן.</p>";
+      return;
     }
 
+    trips.forEach(trip => {
+      const tripCard = document.createElement("article");
+      tripCard.classList.add("trip-card");
+      tripCard.innerHTML = `
+        <h3>${trip.title}</h3>
+        <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
+        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+        <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
+      `;
+      container.appendChild(tripCard);
+    });
+
   } catch (err) {
-    console.error("שגיאה בטעינת נסיעות:", err);
-    upcomingSection.innerHTML += "<p style='color: red;'>שגיאה בטעינת נסיעות</p>";
+    console.error("שגיאה בטעינת נסיעות כנהג:", err);
+    container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנהג</p>";
+  }
+}
+
+async function loadPassengerTrips(userId, container) {
+  try {
+    const res = await fetch(`${baseUrl}/passenger-trips?user_id=${userId}`);
+    if (!res.ok) throw new Error("בעיה בטעינת נסיעות כנוסע");
+    const trips = await res.json();
+
+    if (trips.length === 0) {
+      container.innerHTML += "<p>אין נסיעות שאתה נוסע בהן.</p>";
+      return;
+    }
+
+    trips.forEach(trip => {
+      const tripCard = document.createElement("article");
+      tripCard.classList.add("trip-card");
+      tripCard.innerHTML = `
+        <h3>${trip.title}</h3>
+        <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
+        <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
+        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+        <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
+      `;
+      container.appendChild(tripCard);
+    });
+
+  } catch (err) {
+    console.error("שגיאה בטעינת נסיעות כנוסע:", err);
+    container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנוסע</p>";
   }
 }
