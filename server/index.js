@@ -33,7 +33,10 @@ app.post('/login', async (req, res) => {
     );
 
     if (result.rows.length > 0) {
-      res.status(200).json({ message: "Login successful" });
+      res.status(200).json({
+        message: "Login successful",
+        user_id: result.rows[0].id 
+      });
     } else {
       res.status(401).json({ message: "Invalid username or password" });
     }
