@@ -1,45 +1,49 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventId = urlParams.get("id");
-
   const form = document.getElementById("addDriverForm");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const username = localStorage.getItem("username");
-    if (!username) {
-      alert("יש להתחבר לפני הוספה כנהג.");
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get("id");
+    const userId = localStorage.getItem("user_id"); // ודא ששמרת את זה ב־login
+
+    if (!eventId || !userId) {
+      alert("משהו השתבש - חסר מזהה אירוע או משתמש.");
       return;
     }
 
-    const formData = new FormData(form);
     const driverData = {
-      username,
-      departure_time: formData.get("departure_time"),
-      price: formData.get("price"),
-      car_model: formData.get("car_model"),
-      car_color: formData.get("car_color"),
-      pickup_location: formData.get("pickup_location"),
-      seats_available: formData.get("seats_available"),
+      event_id: eventId,
+      user_id: userId,
+      departure_time: document.getElementById("departure_time").value,
+      price: document.getElementById("price").value,
+      car_model: document.getElementById("car_model").value,
+      car_color: document.getElementById("car_color").value,
+      pickup_location: document.getElementById("pickup_location").value,
+      seats_available: document.getElementById("seats_available").value
     };
 
     try {
-      const res = await fetch(`https://ridematch-a905.onrender.com/events/${eventId}/drivers`, {
+      const response = await fetch("https://ridematch-a905.onrender.com/add-driver", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(driverData),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(driverData)
       });
 
-      if (res.ok) {
-        alert("התווספת בהצלחה כנהג!");
+      if (response.ok) {
+        alert("נוספת בהצלחה כנהג לאירוע!");
         window.location.href = `event-details.html?id=${eventId}`;
       } else {
-        const error = await res.json();
-        alert("שגיאה: " + error.message);
+        const errMsg = await response.text();
+        console.error("Error adding driver:", errMsg);
+        alert("שגיאה בהוספת נהג. נסה שוב.");
       }
     } catch (err) {
-      alert("שגיאה בשרת. נסה שוב מאוחר יותר.");
+      console.error("Error adding driver:", err);
+      alert("שגיאת רשת. נסה שוב מאוחר יותר.");
     }
   });
 });
