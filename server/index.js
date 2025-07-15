@@ -105,6 +105,25 @@ app.post('/add-driver', async (req, res) => {
   }
 });
 
+    app.get('/drivers/:eventId', async (req, res) => {
+  const eventId = req.params.eventId;
+
+  try {
+    const driversResult = await pool.query(
+      `SELECT u.username, ed.departure_time, ed.price, ed.car_model, ed.car_color, ed.pickup_location, ed.seats_available
+       FROM users u
+       JOIN event_drivers ed ON u.id = ed.user_id
+       WHERE ed.event_id = $1`,
+      [eventId]
+    );
+
+    res.status(200).json(driversResult.rows);
+  } catch (error) {
+    console.error('שגיאה בקבלת הנהגים:', error);
+    res.status(500).json({ message: 'שגיאה בשרת בקבלת הנהגים' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
