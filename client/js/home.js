@@ -49,10 +49,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           <h3>${event.title}</h3>
           <p>📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
         </header>
-        <a href="event-details.html?id=${event.id}" class="details-button">צפה בפרטים</a>
+        <a href="event-details.html?id=${event.id}" class="details-button" data-event='${JSON.stringify(event)}'>צפה בפרטים</a>
       `;
 
       eventsGrid.appendChild(article);
     });
   }
+
+  // event details storage
+  eventsGrid.addEventListener("click", (e) => {
+    if (e.target.matches(".details-button")) {
+      e.preventDefault();
+      const eventData = e.target.dataset.event;
+      localStorage.setItem("selectedEvent", eventData);
+      window.location.href = e.target.href;
+    }
+  });
 });

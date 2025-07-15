@@ -53,42 +53,6 @@ app.get('/events', async (req, res) => {
   }
 });
 
-app.get('/events/:id', async (req, res) => {
-  const eventId = req.params.id;
-
-  console.log("Fetching event with ID:", eventId);
-
-  if (!eventId) {
-    console.log("eventId is undefined or null");
-    return res.status(400).json({ message: "Missing event ID" });
-  }
-
-  try {
-    const eventResult = await pool.query(
-      'SELECT * FROM events WHERE id = $1', [eventId]
-    );
-    console.log("Event result:", eventResult.rows);
-
-    const driversResult = await pool.query(
-      `SELECT u.username, u.departure_time, u.price, u.car_model, u.car_color, u.pickup_location, ed.seats_available
-       FROM users u
-       JOIN event_drivers ed ON u.id = ed.user_id
-       WHERE ed.event_id = $1`,
-      [eventId]
-    );
-    console.log("Drivers result:", driversResult.rows);
-
-    res.json({
-      event: eventResult.rows[0],
-      drivers: driversResult.rows
-    });
-
-  } catch (err) {
-    console.error('Error fetching event details:', err.stack || err);
-    res.status(500).json({ message: 'שגיאה בטעינת פרטי האירוע' });
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
