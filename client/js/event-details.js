@@ -34,14 +34,16 @@ document.addEventListener("DOMContentLoaded", () => {
       drivers.forEach(driver => {
         const driverCard = document.createElement("div");
         driverCard.classList.add("driver-card");
+
         driverCard.innerHTML = `
-          <p><strong>${driver.username}</strong></p>
-          <p>⏰ שעת יציאה: ${driver.departure_time}</p>
-          <p>🚘 רכב: ${driver.car_model} (${driver.car_color})</p>
-          <p>📍 מקום איסוף: ${driver.pickup_location}</p>
-          <p>💸 מחיר לנוסע: ${driver.price} ₪</p>
-          <p>🪑 מקומות פנויים: ${driver.seats_available}</p>
+          <h3>${driver.username}</h3>
+          <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
+          <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
+          <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
+          <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
+          <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
         `;
+
         driversListContainer.appendChild(driverCard);
       });
     })
