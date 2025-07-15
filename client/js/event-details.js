@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
           <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
           <div class="driver-actions">
-            <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
-            <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id})">🚗 הרשמה לנסיעה</button>
+          <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
+          <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הרשמה לנסיעה</button>
           </div>
         `;
 
@@ -95,7 +95,7 @@ function sendMessageToDriver(username) {
   alert(`בעתיד תתווסף מערכת הודעות מול ${username}`);
 }
 
-function registerToRide(eventId, driverUserId) {
+function registerToRide(eventId, driverUserId, buttonElement) {
   const passengerUserId = localStorage.getItem("user_id");
 
   if (!passengerUserId) {
@@ -112,9 +112,24 @@ function registerToRide(eventId, driverUserId) {
       passenger_user_id: passengerUserId
     })
   })
-    .then(res => res.json())
-    .then(data => alert(data.message));
+    .then(async res => {
+      const data = await res.json();
+      alert(data.message);
+      if (res.ok && buttonElement) {
+        buttonElement.textContent = "🕒 ממתין לאישור";
+        buttonElement.disabled = true;
+        buttonElement.classList.remove("secondary-button");
+        buttonElement.classList.add("disabled-button");
+      }
+    })
+
+    .catch(err => {
+      console.error("שגיאה בהרשמה לנסיעה:", err);
+      alert("שגיאת רשת");
+    });
 }
+
+
 
 function approvePassenger(eventId, driverUserId, passengerUserId) {
   fetch("https://ridematch-a905.onrender.com/approve-passenger", {

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="he">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +7,6 @@
   <link rel="stylesheet" href="css/header.css" />
   <link rel="stylesheet" href="css/my-trips.css" />
 </head>
-
 <body>
   <header class="main-header">
     <a href="home.html" class="logo">🚗 RideMatch</a>
@@ -21,36 +19,20 @@
   </header>
 
   <main>
+    <div class="role-selector">
+      <button onclick="loadTrips('driver')">🚘 הצג כנהג</button>
+      <button onclick="loadTrips('passenger')">🧍 הצג כנוסע</button>
+    </div>
+
     <section class="trip-section upcoming">
       <h2>🟢 נסיעות מתוכננות</h2>
-
-      <article class="trip-card">
-        <h3>הופעה: עדן בן זקן</h3>
-        <p>📅 תאריך: 30/5/2025 | 🕒 שעה: 20:00</p>
-        <p>🚘 נהג: תומר לוי</p>
-        <p>📍 מקום איסוף: קניון TLV</p>
-        <a href="event-details.html" class="details-button">צפה בפרטים</a>
-      </article>
     </section>
 
     <section class="trip-section past">
       <h2>⚪ נסיעות קודמות</h2>
-
-      <article class="trip-card">
-        <h3>הופעה: נועה קירל</h3>
-        <p>📅 תאריך: 20/5/2025 | 🕒 שעה: 21:00</p>
-        <p>🚘 נהג: מיכאל כהן</p>
-        <p>📍 מקום איסוף: תחנת רכבת סבידור</p>
-      </article>
-
-      <article class="trip-card">
-        <h3>משחק: מכבי תל אביב</h3>
-        <p>📅 תאריך: 18/5/2025 | 🕒 שעה: 20:30</p>
-        <p>🚘 נהג: אור בן דוד</p>
-        <p>📍 מקום איסוף: מרכז חורב</p>
-      </article>
     </section>
   </main>
-</body>
 
+  <script src="js/my-trips.js"></script>
+</body>
 </html>

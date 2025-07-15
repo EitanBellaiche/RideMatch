@@ -288,6 +288,11 @@ body {
   margin-top: 1rem;
 }
 
+.disabled-button {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
 
 
