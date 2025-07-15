@@ -40,55 +40,14 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
           <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
           <div class="driver-actions">
-          <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
-          <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הרשמה לנסיעה</button>
+            <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
+            <button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הירשם לנסיעה</button>
           </div>
         `;
 
         driversListContainer.appendChild(driverCard);
       });
     });
-
-  // בקשות ממתינות לאישור - אם המשתמש הוא נהג
-  if (currentUserId) {
-    fetch(`https://ridematch-a905.onrender.com/pending-passengers/${event.id}?driver_id=${currentUserId}`)
-      .then(res => res.json())
-      .then(passengers => {
-        if (passengers.length === 0) return;
-
-        const section = document.createElement("section");
-        section.classList.add("approval-section");
-
-        const heading = document.createElement("h3");
-        heading.innerText = "בקשות ממתינות לאישור";
-        section.appendChild(heading);
-
-        passengers.forEach(p => {
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <p><strong>${p.username}</strong> ביקש להצטרף</p>
-            <button onclick="approvePassenger(${event.id}, ${currentUserId}, ${p.passenger_user_id})">✔️ אשר</button>
-          `;
-          section.appendChild(div);
-        });
-
-        document.body.appendChild(section);
-      });
-  }
-
-  // אם המשתמש אושר כמשתתף אך עדיין לא שילם – הצג לו אפשרות תשלום
-  if (currentUserId) {
-    fetch(`https://ridematch-a905.onrender.com/passenger-status/${event.id}?user_id=${currentUserId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "approved") {
-          const payButton = document.createElement("button");
-          payButton.innerText = "💳 שלם עבור הנסיעה";
-          payButton.onclick = () => confirmPayment(event.id, data.driver_user_id, currentUserId);
-          document.body.appendChild(payButton);
-        }
-      });
-  }
 });
 
 function sendMessageToDriver(username) {
@@ -116,43 +75,14 @@ function registerToRide(eventId, driverUserId, buttonElement) {
       const data = await res.json();
       alert(data.message);
       if (res.ok && buttonElement) {
-        buttonElement.textContent = "🕒 ממתין לאישור";
+        buttonElement.textContent = "✅ נרשמת לנסיעה";
         buttonElement.disabled = true;
         buttonElement.classList.remove("secondary-button");
         buttonElement.classList.add("disabled-button");
       }
     })
-
     .catch(err => {
       console.error("שגיאה בהרשמה לנסיעה:", err);
       alert("שגיאת רשת");
-    });
-}
-
-
-
-function approvePassenger(eventId, driverUserId, passengerUserId) {
-  fetch("https://ridematch-a905.onrender.com/approve-passenger", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_id: eventId, driver_user_id: driverUserId, passenger_user_id: passengerUserId })
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message);
-      location.reload();
-    });
-}
-
-function confirmPayment(eventId, driverUserId, passengerUserId) {
-  fetch("https://ridematch-a905.onrender.com/confirm-payment", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_id: eventId, driver_user_id: driverUserId, passenger_user_id: passengerUserId })
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message);
-      location.reload();
     });
 }

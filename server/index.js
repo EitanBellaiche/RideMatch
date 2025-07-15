@@ -141,7 +141,7 @@ app.post('/join-ride', async (req, res) => {
   }
 
   try {
-    // בדיקה אם כבר ביקש להצטרף
+    // בדוק אם כבר קיים
     const exists = await pool.query(
       `SELECT * FROM event_passengers 
        WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3`,
@@ -149,21 +149,40 @@ app.post('/join-ride', async (req, res) => {
     );
 
     if (exists.rows.length > 0) {
-      return res.status(409).json({ message: "כבר שלחת בקשה לנסיעה זו" });
+      return res.status(409).json({ message: "כבר נרשמת לנסיעה זו" });
     }
 
-    // שלב בקשה בלבד (לא נוגע במקומות פנויים עדיין)
+    // בדיקת זמינות
+    const available = await pool.query(
+      `SELECT seats_available FROM event_drivers 
+       WHERE event_id = $1 AND user_id = $2`,
+      [event_id, driver_user_id]
+    );
+
+    if (available.rows.length === 0 || available.rows[0].seats_available <= 0) {
+      return res.status(400).json({ message: "אין מקומות פנויים בנסיעה זו" });
+    }
+
+    // הוספה עם status = 'paid'
     await pool.query(
       `INSERT INTO event_passengers 
        (event_id, driver_user_id, passenger_user_id, status)
-       VALUES ($1, $2, $3, 'pending')`,
+       VALUES ($1, $2, $3, 'paid')`,
       [event_id, driver_user_id, passenger_user_id]
     );
 
-    res.status(200).json({ message: "הבקשה להצטרפות נשלחה. ממתינה לאישור הנהג." });
+    // עדכון מקומות
+    await pool.query(
+      `UPDATE event_drivers 
+       SET seats_available = seats_available - 1 
+       WHERE event_id = $1 AND user_id = $2`,
+      [event_id, driver_user_id]
+    );
+
+    res.status(200).json({ message: "נרשמת בהצלחה לנסיעה!" });
 
   } catch (err) {
-    console.error("שגיאה בבקשת הצטרפות:", err);
+    console.error("שגיאה בהרשמה לנסיעה:", err);
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
