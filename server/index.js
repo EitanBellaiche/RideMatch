@@ -141,6 +141,7 @@ app.post('/join-ride', async (req, res) => {
   }
 
   try {
+    // בדיקה אם כבר נרשם לנסיעה
     const exists = await pool.query(
       `SELECT * FROM event_passengers 
        WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3`,
@@ -151,10 +152,36 @@ app.post('/join-ride', async (req, res) => {
       return res.status(409).json({ message: "כבר נרשמת לנסיעה הזו" });
     }
 
+    // בדיקה אם יש מקומות פנויים
+    const availableSeatsResult = await pool.query(
+      `SELECT seats_available 
+       FROM event_drivers 
+       WHERE event_id = $1 AND user_id = $2`,
+      [event_id, driver_user_id]
+    );
+
+    if (availableSeatsResult.rows.length === 0) {
+      return res.status(404).json({ message: "הנהג לא נמצא" });
+    }
+
+    const availableSeats = availableSeatsResult.rows[0].seats_available;
+    if (availableSeats <= 0) {
+      return res.status(400).json({ message: "אין מקומות פנויים בנסיעה זו" });
+    }
+
+    // מוסיף לנוסעים
     await pool.query(
       `INSERT INTO event_passengers (event_id, driver_user_id, passenger_user_id)
        VALUES ($1, $2, $3)`,
       [event_id, driver_user_id, passenger_user_id]
+    );
+
+    // מעדכן מספר מקומות פנויים
+    await pool.query(
+      `UPDATE event_drivers 
+       SET seats_available = seats_available - 1 
+       WHERE event_id = $1 AND user_id = $2`,
+      [event_id, driver_user_id]
     );
 
     res.status(200).json({ message: "נרשמת בהצלחה לנסיעה!" });
