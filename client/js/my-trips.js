@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+const baseUrl = "https://ridematch-a905.onrender.com"; // ודא שזו כתובת השרת שלך
+
 async function loadTrips(role) {
   const userId = localStorage.getItem("user_id");
   if (!userId) return;
@@ -26,14 +28,16 @@ async function loadTrips(role) {
   const upcomingSection = document.querySelector(".trip-section.upcoming");
   upcomingSection.innerHTML = "<h2>🟢 נסיעות מתוכננות</h2>";
 
-  const endpoint = role === "driver" ? "/driver-trips" : "/passenger-trips";
+  const endpoint = role === "driver"
+    ? `${baseUrl}/driver-trips`
+    : `${baseUrl}/passenger-trips`;
 
   try {
     const response = await fetch(`${endpoint}?user_id=${userId}`);
+    if (!response.ok) throw new Error("Network response was not ok");
+
     const trips = await response.json();
-
     const now = new Date();
-
     let hasUpcoming = false;
 
     trips.forEach(trip => {
@@ -61,5 +65,6 @@ async function loadTrips(role) {
 
   } catch (err) {
     console.error("שגיאה בטעינת נסיעות:", err);
+    upcomingSection.innerHTML += "<p style='color: red;'>שגיאה בטעינת נסיעות</p>";
   }
 }
