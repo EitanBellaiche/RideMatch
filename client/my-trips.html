@@ -2,37 +2,34 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>הנסיעות שלי</title>
   <link rel="stylesheet" href="css/header.css" />
   <link rel="stylesheet" href="css/my-trips.css" />
 </head>
-<body>
+<body dir="rtl">
   <header class="main-header">
-    <a href="home.html" class="logo">🚗 RideMatch</a>
+    <span class="logo">🚗 RideMatch</span>
     <nav class="nav-links">
       <a href="home.html">דף הבית</a>
-      <a href="my-trips.html">הנסיעות שלי</a>
-      <a href="my-payments.html">התשלומים שלי</a>
+      <a href="my-trips.html" class="active">הנסיעות שלי</a>
       <a href="my-profile.html">הפרופיל שלי</a>
     </nav>
   </header>
 
-  <main>
-    <div class="role-selector">
-      <button onclick="loadTrips('driver')">🚘 הצג כנהג</button>
-      <button onclick="loadTrips('passenger')">🧍 הצג כנוסע</button>
+  <main class="my-trips-page">
+    <h1>הנסיעות שלי</h1>
+
+    <div class="role-toggle">
+      <button id="driverView" class="toggle-button">כנהג</button>
+      <button id="passengerView" class="toggle-button">כנוסע</button>
     </div>
 
     <section class="trip-section upcoming">
-      <h2>🟢 נסיעות מתוכננות</h2>
-    </section>
-
-    <section class="trip-section past">
-      <h2>⚪ נסיעות קודמות</h2>
+      <!-- כאן יוצגו הנסיעות המתוכננות -->
     </section>
   </main>
 
-  <script src="js/my-trips.js"></script>
+  <script src="my-trips.js"></script>
 </body>
 </html>

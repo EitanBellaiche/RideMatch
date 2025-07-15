@@ -1,11 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const userId = localStorage.getItem("user_id"); 
+  const userId = localStorage.getItem("user_id");
 
   if (!userId) {
     alert("לא מחובר");
     window.location.href = "login.html";
     return;
   }
+
+  // ברירת מחדל: הצג נסיעות כנהג
+  loadTrips("driver");
+
+  document.getElementById("driverView").addEventListener("click", () => {
+    loadTrips("driver");
+  });
+
+  document.getElementById("passengerView").addEventListener("click", () => {
+    loadTrips("passenger");
+  });
 });
 
 async function loadTrips(role) {
@@ -13,11 +24,7 @@ async function loadTrips(role) {
   if (!userId) return;
 
   const upcomingSection = document.querySelector(".trip-section.upcoming");
-  const pastSection = document.querySelector(".trip-section.past");
-
-  
   upcomingSection.innerHTML = "<h2>🟢 נסיעות מתוכננות</h2>";
-  pastSection.innerHTML = "<h2>⚪ נסיעות קודמות</h2>";
 
   const endpoint = role === "driver" ? "/driver-trips" : "/passenger-trips";
 
@@ -25,26 +32,31 @@ async function loadTrips(role) {
     const response = await fetch(`${endpoint}?user_id=${userId}`);
     const trips = await response.json();
 
+    const now = new Date();
+
+    let hasUpcoming = false;
+
     trips.forEach(trip => {
-      const tripCard = document.createElement("article");
-      tripCard.classList.add("trip-card");
+      const tripDateTime = new Date(`${trip.date}T${trip.time}`);
+      if (tripDateTime >= now) {
+        const tripCard = document.createElement("article");
+        tripCard.classList.add("trip-card");
 
-      tripCard.innerHTML = `
-        <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
-        <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
-        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
-      `;
+        tripCard.innerHTML = `
+          <h3>${trip.title}</h3>
+          <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
+          <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
+          <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+          <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
+        `;
 
-      const tripDate = new Date(trip.date);
-      const now = new Date();
-      const section = tripDate >= now ? upcomingSection : pastSection;
-      section.appendChild(tripCard);
+        upcomingSection.appendChild(tripCard);
+        hasUpcoming = true;
+      }
     });
 
-    if (trips.length === 0) {
-      upcomingSection.innerHTML += "<p>לא נמצאו נסיעות</p>";
+    if (!hasUpcoming) {
+      upcomingSection.innerHTML += "<p>לא נמצאו נסיעות מתוכננות</p>";
     }
 
   } catch (err) {
