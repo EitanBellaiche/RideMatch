@@ -329,22 +329,38 @@ app.post('/confirm-payment', async (req, res) => {
 });
 
 app.delete('/cancel-ride', async (req, res) => {
-  const { event_id, driver_user_id, passenger_user_id } = req.body;
+  const { event_id, passenger_user_id } = req.body;
 
-  console.log("בקשת ביטול התקבלה עם:", { event_id, driver_user_id, passenger_user_id });
+  console.log("בקשת ביטול התקבלה עם:", { event_id, passenger_user_id });
 
-  if (!event_id || !driver_user_id || !passenger_user_id) {
+  if (!event_id || !passenger_user_id) {
     return res.status(400).json({ message: "Missing fields" });
   }
 
   try {
+    // שלב 1: קבל את driver_user_id שמתאים לנוסע
+    const driverRes = await pool.query(`
+      SELECT driver_user_id
+      FROM event_passengers
+      WHERE event_id = $1 AND passenger_user_id = $2
+      LIMIT 1
+    `, [event_id, passenger_user_id]);
+
+    if (driverRes.rows.length === 0) {
+      return res.status(404).json({ message: "לא נמצאה הרשמה מתאימה לנסיעה" });
+    }
+
+    const driver_user_id = driverRes.rows[0].driver_user_id;
+
+    // שלב 2: מחק את הנוסע מהנסיעה
     const result = await pool.query(`
       DELETE FROM event_passengers
-      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
-    `, [event_id, driver_user_id, passenger_user_id]);
+      WHERE event_id = $1 AND passenger_user_id = $2
+    `, [event_id, passenger_user_id]);
 
-    console.log("מספר שורות שנמחקו:", result.rowCount);
+    console.log("נמחקו שורות:", result.rowCount);
 
+    // שלב 3: עדכן את כמות המושבים אצל הנהג
     if (result.rowCount > 0) {
       await pool.query(`
         UPDATE event_drivers
@@ -353,9 +369,9 @@ app.delete('/cancel-ride', async (req, res) => {
       `, [event_id, driver_user_id]);
     }
 
-    res.status(200).json({ message: "ההרשמה לנסיעה בוטלה" });
+    res.status(200).json({ message: "ההרשמה לנסיעה בוטלה והמושב שוחרר" });
   } catch (err) {
-    console.error("שגיאה בביטול ההרשמה:", err); // שורה חשובה!
+    console.error("שגיאה בביטול ההרשמה:", err);
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
