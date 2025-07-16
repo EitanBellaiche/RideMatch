@@ -331,6 +331,8 @@ app.post('/confirm-payment', async (req, res) => {
 app.delete('/cancel-ride', async (req, res) => {
   const { event_id, driver_user_id, passenger_user_id } = req.body;
 
+  console.log("בקשת ביטול התקבלה עם:", { event_id, driver_user_id, passenger_user_id });
+
   if (!event_id || !driver_user_id || !passenger_user_id) {
     return res.status(400).json({ message: "Missing fields" });
   }
@@ -340,6 +342,8 @@ app.delete('/cancel-ride', async (req, res) => {
       DELETE FROM event_passengers
       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
     `, [event_id, driver_user_id, passenger_user_id]);
+
+    console.log("מספר שורות שנמחקו:", result.rowCount);
 
     if (result.rowCount > 0) {
       await pool.query(`
@@ -351,10 +355,11 @@ app.delete('/cancel-ride', async (req, res) => {
 
     res.status(200).json({ message: "ההרשמה לנסיעה בוטלה" });
   } catch (err) {
-    console.error("שגיאה בביטול ההרשמה:", err);
+    console.error("שגיאה בביטול ההרשמה:", err); // שורה חשובה!
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
