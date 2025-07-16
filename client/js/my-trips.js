@@ -40,7 +40,6 @@ async function loadDriverTrips(userId, container) {
             tripCard.innerHTML = `
                 <h3>${trip.title}</h3>
                 <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
-                <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
                 <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
                 <a href="driver-trip-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
             `;
@@ -73,8 +72,51 @@ async function loadPassengerTrips(userId, container) {
                 <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
                 <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
                 <a href="event-details.html?id=${trip.event_id}" class="details-button">צפה בפרטים</a>
+                <button class="cancel-button"
+                        data-event="${trip.event_id}"
+                        data-driver="${trip.driver_user_id}">
+                    בטל הרשמה
+                </button>
             `;
             container.appendChild(tripCard);
+        });
+
+        // מאזין לכפתורי הביטול
+        container.addEventListener("click", async (e) => {
+            if (e.target.classList.contains("cancel-button")) {
+                const eventId = e.target.dataset.event;
+                const driverId = e.target.dataset.driver;
+                const passengerId = localStorage.getItem("user_id");
+
+                const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל את ההרשמה לנסיעה זו?");
+                if (!confirmCancel) return;
+
+                try {
+                    const res = await fetch(`${baseUrl}/cancel-ride`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            event_id: eventId,
+                            driver_user_id: driverId,
+                            passenger_user_id: passengerId
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message);
+                        container.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
+                        loadPassengerTrips(passengerId, container);
+                    } else {
+                        alert(data.message || "שגיאה בביטול");
+                    }
+                } catch (err) {
+                    console.error("שגיאה בביטול הנסיעה:", err);
+                    alert("שגיאה בביטול הנסיעה");
+                }
+            }
         });
 
     } catch (err) {
