@@ -41,53 +41,43 @@ main {
   color: #CBD5E1;
 }
 
-.trip-card button {
-  margin-top: 1rem;
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   padding: 10px 18px;
-  background-color: #06B6D4;
-  border: none;
-  color: white;
   border-radius: 8px;
   font-weight: bold;
+  font-size: 0.95rem;
+  min-width: 160px;   /* רוחב קבוע */
+  min-height: 44px;   /* גובה אחיד */
+  box-sizing: border-box;
+  color: white;
+  border: none;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 10px;
+  margin-left: 10px;
+  text-decoration: none; /* לוודא שגם בקישורים */
+  white-space: nowrap; /* לא יישברו שורות */
 }
 
-.trip-card button:hover {
-  background-color: #0891B2;
-}
 
+/* 🔵 כפתור צפייה בפרטים */
 .details-button {
-  display: inline-block;
   background-color: #06B6D4;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s;
-  font-size: 0.95rem;
 }
 
 .details-button:hover {
   background-color: #0891B2;
 }
 
+/* 🔴 כפתור ביטול */
 .cancel-button {
-  display: inline-block;
-  background-color: #EF4444; /* אדום */
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: 0.95rem;
-  margin-right: 0.5rem;
+  background-color: #EF4444;
 }
 
 .cancel-button:hover {
-  background-color: #DC2626; /* אדום כהה */
+  background-color: #DC2626;
 }
-
