@@ -39,7 +39,7 @@ async function loadDriverTrips(userId, container) {
       tripCard.classList.add("trip-card");
       tripCard.innerHTML = `
         <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
+<p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
         <a href="driver-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
       `;
@@ -67,7 +67,7 @@ async function loadPassengerTrips(userId, container) {
       tripCard.classList.add("trip-card");
       tripCard.innerHTML = `
         <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעה: ${trip.time}</p>
+<p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
         <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
         <a href="event-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>

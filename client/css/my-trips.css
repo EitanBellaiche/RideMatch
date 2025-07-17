@@ -50,8 +50,8 @@ main {
   border-radius: 8px;
   font-weight: bold;
   font-size: 0.95rem;
-  min-width: 160px;   /* רוחב קבוע */
-  min-height: 44px;   /* גובה אחיד */
+  min-width: 160px;   
+  min-height: 44px;   
   box-sizing: border-box;
   color: white;
   border: none;
@@ -59,12 +59,10 @@ main {
   transition: background-color 0.3s;
   margin-top: 10px;
   margin-left: 10px;
-  text-decoration: none; /* לוודא שגם בקישורים */
-  white-space: nowrap; /* לא יישברו שורות */
+  text-decoration: none; 
+  white-space: nowrap; 
 }
 
-
-/* 🔵 כפתור צפייה בפרטים */
 .details-button {
   background-color: #06B6D4;
 }
@@ -73,7 +71,6 @@ main {
   background-color: #0891B2;
 }
 
-/* 🔴 כפתור ביטול */
 .cancel-button {
   background-color: #EF4444;
 }

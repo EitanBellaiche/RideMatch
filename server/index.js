@@ -192,10 +192,11 @@ app.get('/driver-trips', async (req, res) => {
   const { user_id } = req.query;
   try {
     const result = await pool.query(`
-      SELECT e.id as event_id, e.title, e.day AS date, e.time, ed.pickup_location
-      FROM event_drivers ed
-      JOIN events e ON ed.event_id = e.id
-      WHERE ed.user_id = $1
+      SELECT e.id as event_id, e.title, e.day AS date, ed.departure_time, ed.pickup_location
+FROM event_drivers ed
+JOIN events e ON ed.event_id = e.id
+WHERE ed.user_id = $1
+
     `, [user_id]);
 
     res.json(result.rows);
@@ -210,17 +211,19 @@ app.get('/passenger-trips', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-        e.id as event_id,
-        e.title,
-        e.day AS date,
-        e.time,
-        ed.pickup_location,
-        u.username as driver_name
-      FROM event_passengers ep
-      JOIN events e ON ep.event_id = e.id
-      JOIN event_drivers ed ON ep.driver_user_id = ed.user_id AND ep.event_id = ed.event_id
-      JOIN users u ON ed.user_id = u.id
-      WHERE ep.passenger_user_id = $1
+  e.id as event_id,
+  e.title,
+  e.day AS date,
+  ed.departure_time,
+  ed.pickup_location,
+  u.username as driver_name,
+  ed.user_id as driver_user_id
+FROM event_passengers ep
+JOIN events e ON ep.event_id = e.id
+JOIN event_drivers ed ON ep.driver_user_id = ed.user_id AND ep.event_id = ed.event_id
+JOIN users u ON ed.user_id = u.id
+WHERE ep.passenger_user_id = $1
+
     `, [user_id]);
 
     res.json(result.rows);
