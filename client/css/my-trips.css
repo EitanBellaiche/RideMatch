@@ -78,3 +78,14 @@ main {
 .cancel-button:hover {
   background-color: #DC2626;
 }
+.status-warning {
+  color: #fbbf24; 
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.status-info {
+  color: #38bdf8; 
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
