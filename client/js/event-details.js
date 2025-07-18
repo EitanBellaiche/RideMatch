@@ -86,6 +86,11 @@ function registerToRide(eventId, driverUserId, buttonElement) {
     return;
   }
 
+  if (parseInt(passengerUserId) === parseInt(driverUserId)) {
+    alert("אינך יכול להירשם לנסיעה של עצמך.");
+    return;
+  }
+
   buttonElement.textContent = "⏳ ממתין לאישור";
   buttonElement.disabled = true;
   buttonElement.classList.remove("secondary-button");
@@ -119,6 +124,7 @@ function registerToRide(eventId, driverUserId, buttonElement) {
       buttonElement.classList.add("secondary-button");
     });
 }
+
 
 function startPaymentProcess(buttonElement, eventId, driverUserId) {
   const passengerUserId = localStorage.getItem("user_id");

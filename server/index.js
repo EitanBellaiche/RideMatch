@@ -140,6 +140,10 @@ app.post('/join-ride', async (req, res) => {
     return res.status(400).json({ message: "חסרים שדות נדרשים" });
   }
 
+  if (parseInt(driver_user_id) === parseInt(passenger_user_id)) {
+    return res.status(400).json({ message: "נהג אינו יכול להירשם לנסיעה של עצמו" });
+  }
+
   try {
     // בדוק אם כבר קיים
     const exists = await pool.query(
