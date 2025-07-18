@@ -77,8 +77,14 @@ async function loadPassengerTrips(userId, container) {
        if (status === "paid") {
   statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
 } else if (status === "approved") {
-  buttonHTML = `<div class="trip-badge badge-approved" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">💳 אושרת, שלם בבקשה</div>`;
-} else if (status === "pending") {
+  statusHTML = `
+    <div class="trip-badge badge-approved">💳 אושרת, שלם בבקשה</div>
+    <button class="pay-now-button" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">
+      שלם עכשיו
+    </button>
+  `;
+}
+else if (status === "pending") {
   statusHTML = `<div class="trip-badge badge-pending">⏳ ממתין לאישור נהג</div>`;
 }
 
