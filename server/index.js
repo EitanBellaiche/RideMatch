@@ -383,6 +383,33 @@ app.delete('/cancel-ride', async (req, res) => {
   }
 });
 
+app.delete("/cancel-trip-by-driver", async (req, res) => {
+  const { event_id, driver_user_id } = req.body;
+
+  try {
+    // ודא שהמשתמש אכן הנהג של הנסיעה
+    const [rows] = await connection.execute(
+      `SELECT * FROM dbShnkr24stud.tbl105_events WHERE event_id = ? AND user_id = ?`,
+      [event_id, driver_user_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(403).json({ message: "אין הרשאה לבטל נסיעה זו." });
+    }
+
+    // אפשרות 1: מחיקה מהטבלה
+    await connection.execute(
+      `DELETE FROM dbShnkr24stud.tbl105_events WHERE event_id = ?`,
+      [event_id]
+    );
+
+    res.json({ message: "הנסיעה בוטלה בהצלחה." });
+  } catch (err) {
+    console.error("שגיאה בביטול נסיעה ע\"י נהג:", err);
+    res.status(500).json({ message: "שגיאה בשרת בעת ביטול נסיעה." });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

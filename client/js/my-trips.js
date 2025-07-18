@@ -39,17 +39,58 @@ async function loadDriverTrips(userId, container) {
       tripCard.classList.add("trip-card");
       tripCard.innerHTML = `
         <h3>${trip.title}</h3>
-<p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+        <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
         <a href="driver-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+        <button class="action-button cancel-button driver-cancel-button"
+                data-event="${trip.event_id}"
+                data-driver="${trip.driver_user_id}">
+          בטל נסיעה
+        </button>
       `;
       container.appendChild(tripCard);
     });
+
+    // האזנה לביטול נסיעה ע"י נהג
+    container.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("driver-cancel-button")) {
+        const eventId = e.target.dataset.event;
+        const driverId = e.target.dataset.driver;
+
+        const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל את הנסיעה?");
+        if (!confirmCancel) return;
+
+        try {
+          const res = await fetch(`${baseUrl}/cancel-trip-by-driver`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              event_id: eventId,
+              driver_user_id: driverId
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert(data.message || "הנסיעה בוטלה בהצלחה");
+            container.innerHTML = "<h2>🔵 נסיעות כנהג</h2>";
+            loadDriverTrips(driverId, container); // רענון
+          } else {
+            alert(data.message || "שגיאה בביטול");
+          }
+        } catch (err) {
+          console.error("שגיאה בביטול הנסיעה:", err);
+          alert("שגיאה בביטול הנסיעה");
+        }
+      }
+    });
+
   } catch (err) {
     console.error("שגיאה בטעינת נסיעות כנהג:", err);
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנהג</p>";
   }
 }
+
 
 async function loadPassengerTrips(userId, container) {
   try {
