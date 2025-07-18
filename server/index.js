@@ -387,28 +387,35 @@ app.delete("/cancel-trip-by-driver", async (req, res) => {
   const { event_id, driver_user_id } = req.body;
 
   try {
-    // ודא שהמשתמש אכן הנהג של הנסיעה
-    const [rows] = await connection.execute(
-      `SELECT * FROM dbShnkr24stud.tbl105_events WHERE event_id = ? AND user_id = ?`,
+    // בדיקה האם הנהג הזה קיים ב־event_drivers
+    const result = await pool.query(
+      `SELECT * FROM event_drivers WHERE event_id = $1 AND user_id = $2`,
       [event_id, driver_user_id]
     );
 
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(403).json({ message: "אין הרשאה לבטל נסיעה זו." });
     }
 
-    // אפשרות 1: מחיקה מהטבלה
-    await connection.execute(
-      `DELETE FROM dbShnkr24stud.tbl105_events WHERE event_id = ?`,
-      [event_id]
+    // מחיקת כל הנוסעים של הנסיעה
+    await pool.query(
+      `DELETE FROM event_passengers WHERE event_id = $1 AND driver_user_id = $2`,
+      [event_id, driver_user_id]
     );
 
-    res.json({ message: "הנסיעה בוטלה בהצלחה." });
+    // מחיקת הנהג מהנסיעה
+    await pool.query(
+      `DELETE FROM event_drivers WHERE event_id = $1 AND user_id = $2`,
+      [event_id, driver_user_id]
+    );
+
+    res.status(200).json({ message: "הנסיעה בוטלה בהצלחה על ידי הנהג." });
   } catch (err) {
     console.error("שגיאה בביטול נסיעה ע\"י נהג:", err);
     res.status(500).json({ message: "שגיאה בשרת בעת ביטול נסיעה." });
   }
 });
+
 
 
 app.listen(PORT, () => {
