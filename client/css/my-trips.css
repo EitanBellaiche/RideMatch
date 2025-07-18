@@ -79,10 +79,18 @@ main {
   background-color: #DC2626;
 }
 .status-warning {
-  color: #fbbf24; 
+  background-color: #facc15;
+  color: #1E293B;
   font-weight: bold;
-  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: 0.7rem 0 0.5rem;
+  text-align: center;
+  border-left: 4px solid #eab308;
+  border-right: 4px solid #eab308;
 }
+
 
 .status-info {
   color: #38bdf8; 
