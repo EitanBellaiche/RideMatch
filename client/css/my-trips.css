@@ -24,11 +24,12 @@ main {
 }
 
 .trip-card {
+  position: relative;
   background-color: #1E293B;
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .trip-card h3 {
@@ -50,8 +51,8 @@ main {
   border-radius: 8px;
   font-weight: bold;
   font-size: 0.95rem;
-  min-width: 160px;   
-  min-height: 44px;   
+  min-width: 160px;
+  min-height: 44px;
   box-sizing: border-box;
   color: white;
   border: none;
@@ -59,8 +60,8 @@ main {
   transition: background-color 0.3s;
   margin-top: 10px;
   margin-left: 10px;
-  text-decoration: none; 
-  white-space: nowrap; 
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .details-button {
@@ -78,22 +79,41 @@ main {
 .cancel-button:hover {
   background-color: #DC2626;
 }
-.status-warning {
-  background-color: #facc15;
-  color: #1E293B;
-  font-weight: bold;
+
+.trip-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
   font-size: 0.95rem;
-  padding: 6px 12px;
-  border-radius: 6px;
-  margin: 0.7rem 0 0.5rem;
-  text-align: center;
-  border-left: 4px solid #eab308;
-  border-right: 4px solid #eab308;
+  font-weight: 600;
+  font-family: 'Segoe UI', sans-serif;
+  border-radius: 10px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  direction: rtl;
 }
 
 
-.status-info {
-  color: #38bdf8; 
-  font-weight: bold;
-  margin-top: 0.5rem;
+.badge-paid {
+  background-color: #22C55E; 
+  color: white;
+  border-color: #16A34A;
+}
+
+.badge-approved {
+  background-color: #FBBF24; 
+  color: #1E293B;
+  border-color: #D97706;
+}
+
+.badge-pending {
+  background-color: #6B7280; 
+  color: white;
+  border-color: #4B5563;
 }

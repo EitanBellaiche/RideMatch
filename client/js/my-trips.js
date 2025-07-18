@@ -66,19 +66,22 @@ async function loadPassengerTrips(userId, container) {
       const tripCard = document.createElement("article");
       tripCard.classList.add("trip-card");
 
-      let statusMessage = "";
+      let buttonHTML = "";
+      let statusHTML = "";
+
       try {
         const checkRes = await fetch(`${baseUrl}/check-registration?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}&passenger_user_id=${userId}`);
         const checkData = await checkRes.json();
         const status = checkData.status;
 
-        if (status === "pending") {
-          statusMessage = `<p class="status-warning">⏳ ממתין לאישור הנהג...</p>`;
-        } else if (status === "approved") {
-          statusMessage = `<p class="status-info">✅ אושר - ממתין לתשלום</p>`;
-        } else if (status === "paid") {
-          statusMessage = ""; 
-        }
+       if (status === "paid") {
+  statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
+} else if (status === "approved") {
+  buttonHTML = `<div class="trip-badge badge-approved" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">💳 אושרת, שלם בבקשה</div>`;
+} else if (status === "pending") {
+  statusHTML = `<div class="trip-badge badge-pending">⏳ ממתין לאישור נהג</div>`;
+}
+
       } catch (e) {
         console.warn("שגיאה בבדיקת סטטוס:", e);
       }
@@ -88,17 +91,20 @@ async function loadPassengerTrips(userId, container) {
         <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
         <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        ${statusMessage}
         <a href="event-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+        ${buttonHTML}
+        ${statusHTML}
         <button class="action-button cancel-button"
                 data-event="${trip.event_id}"
                 data-driver="${trip.driver_user_id}">
           בטל הרשמה
         </button>
       `;
+
       container.appendChild(tripCard);
     }
 
+    // ביטול הרשמה
     container.addEventListener("click", async (e) => {
       if (e.target.classList.contains("cancel-button")) {
         const eventId = e.target.dataset.event;
@@ -139,4 +145,47 @@ async function loadPassengerTrips(userId, container) {
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנוסע</p>";
   }
 }
+
+function startPaymentProcess(buttonElement, eventId, driverUserId) {
+  const passengerUserId = localStorage.getItem("user_id");
+
+  if (!passengerUserId) {
+    alert("עליך להתחבר כדי לשלם.");
+    return;
+  }
+
+  buttonElement.disabled = true;
+  buttonElement.textContent = "🔄 מעבד תשלום...";
+
+  setTimeout(() => {
+    fetch(`${baseUrl}/confirm-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: eventId,
+        driver_user_id: driverUserId,
+        passenger_user_id: passengerUserId
+      })
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (res.ok) {
+          buttonElement.textContent = "✅ רשום לנסיעה";
+          buttonElement.classList.remove("pay-button");
+          buttonElement.classList.add("disabled-button");
+        } else {
+          buttonElement.textContent = "💳 אושרת, שלם בבקשה";
+          buttonElement.disabled = false;
+          alert(data.message || "שגיאה בעיבוד תשלום");
+        }
+      })
+      .catch(err => {
+        console.error("שגיאה ברשת:", err);
+        buttonElement.textContent = "💳 אושרת, שלם בבקשה";
+        buttonElement.disabled = false;
+        alert("שגיאת רשת. נסה שוב.");
+      });
+  }, 2000);
+}
+
 
