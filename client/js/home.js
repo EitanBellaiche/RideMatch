@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 🟢 הפעלת בדיקת התראות לנהג
   checkPendingRequestsOnHome();
+  checkPassengerApprovalStatusOnHome();
 });
 
 // ✅ הצגת אירועים
@@ -117,4 +118,42 @@ function showHomeAlert(username) {
   setTimeout(() => {
     alert.remove();
   }, 6000); // נעלם אחרי 6 שניות
+}
+function checkPassengerApprovalStatusOnHome() {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return;
+
+  const approvedTripsNotified = new Set();
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(`https://ridematch-a905.onrender.com/passenger-trips?user_id=${userId}`);
+      const trips = await res.json();
+
+      trips.forEach(trip => {
+        if (
+          trip.status === "approved" &&
+          !approvedTripsNotified.has(trip.event_id)
+        ) {
+          showPassengerAlert(trip.title);
+          approvedTripsNotified.add(trip.event_id);
+        }
+      });
+    } catch (err) {
+      console.error("שגיאה בבדיקת סטטוס לנוסע בדף הבית:", err);
+    }
+  }, 3000); // כל 3 שניות
+}
+
+function showPassengerAlert(eventTitle) {
+  if (document.querySelector(".approved-passenger-alert")) return;
+
+  const alert = document.createElement("div");
+  alert.className = "new-request-alert approved-passenger-alert";
+  alert.innerHTML = `✅ אושרת לנסיעה: <strong>${eventTitle}</strong> — תוכל כעת לשלם`;
+  document.body.appendChild(alert);
+
+  setTimeout(() => {
+    alert.remove();
+  }, 6000);
 }

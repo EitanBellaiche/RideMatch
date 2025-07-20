@@ -339,5 +339,7 @@ body {
   z-index: 9999;
   animation: slideIn 0.4s ease-out;
 }
-
+.approved-passenger-alert {
+  background-color: #16A34A; /* ירוק */
+}
 

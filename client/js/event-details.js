@@ -13,9 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".event-header p").innerText =
     `📍 ${event.location} | 🕒 ${event.day} ${event.time}`;
 
-    checkPassengerApprovalStatus(event.id, currentUserId);
-
-
   const addDriverLink = document.getElementById("addDriverLink");
   if (addDriverLink && event.id) {
     addDriverLink.href = `add-driver.html?id=${event.id}`;
@@ -77,6 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // בדוק אם המשתמש המחובר הוא הנהג
         if (parseInt(currentUserId) === parseInt(driver.driver_user_id)) {
           checkPendingJoinRequests(event.id, driver.driver_user_id);
+          checkPassengerApprovalStatusOnHome();
+
         }
       });
     });
@@ -208,8 +207,11 @@ function showDriverAlert(username) {
 }
 
 // 🟢 התראה לנוסע שאושרה בקשתו
-function checkPassengerApprovalStatus(eventId, userId) {
-  const approvedEvents = new Set();
+function checkPassengerApprovalStatusOnHome() {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return;
+
+  const approvedTripsNotified = new Set();
 
   setInterval(async () => {
     try {
@@ -218,27 +220,28 @@ function checkPassengerApprovalStatus(eventId, userId) {
 
       trips.forEach(trip => {
         if (
-          trip.event_id === eventId &&
           trip.status === "approved" &&
-          !approvedEvents.has(trip.event_id)
+          !approvedTripsNotified.has(trip.event_id)
         ) {
           showPassengerAlert(trip.title);
-          approvedEvents.add(trip.event_id);
+          approvedTripsNotified.add(trip.event_id);
         }
       });
     } catch (err) {
-      console.error("שגיאה בבדיקת סטטוס לנוסע:", err);
+      console.error("שגיאה בבדיקת סטטוס לנוסע בדף הבית:", err);
     }
-  }, 3000);
+  }, 3000); // כל 3 שניות
 }
 
 function showPassengerAlert(eventTitle) {
+  if (document.querySelector(".approved-passenger-alert")) return;
+
   const alert = document.createElement("div");
-  alert.className = "new-request-alert";
+  alert.className = "new-request-alert approved-passenger-alert";
   alert.innerHTML = `✅ אושרת לנסיעה: <strong>${eventTitle}</strong> — תוכל כעת לשלם`;
   document.body.appendChild(alert);
 
   setTimeout(() => {
     alert.remove();
-  }, 8000);
+  }, 6000);
 }

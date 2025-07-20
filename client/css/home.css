@@ -155,4 +155,6 @@ main {
     transform: translateY(0);
   }
 }
-
+.approved-passenger-alert {
+  background-color: #22c55e; /* ירוק */
+}
