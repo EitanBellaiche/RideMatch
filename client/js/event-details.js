@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector(".event-header p").innerText =
     `📍 ${event.location} | 🕒 ${event.day} ${event.time}`;
 
+    checkPassengerApprovalStatus(event.id, currentUserId);
+
+
   const addDriverLink = document.getElementById("addDriverLink");
   if (addDriverLink && event.id) {
     addDriverLink.href = `add-driver.html?id=${event.id}`;
@@ -197,6 +200,42 @@ function showDriverAlert(username) {
   const alert = document.createElement("div");
   alert.className = "new-request-alert";
   alert.innerHTML = `🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך!`;
+  document.body.appendChild(alert);
+
+  setTimeout(() => {
+    alert.remove();
+  }, 8000);
+}
+
+// 🟢 התראה לנוסע שאושרה בקשתו
+function checkPassengerApprovalStatus(eventId, userId) {
+  const approvedEvents = new Set();
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(`https://ridematch-a905.onrender.com/passenger-trips?user_id=${userId}`);
+      const trips = await res.json();
+
+      trips.forEach(trip => {
+        if (
+          trip.event_id === eventId &&
+          trip.status === "approved" &&
+          !approvedEvents.has(trip.event_id)
+        ) {
+          showPassengerAlert(trip.title);
+          approvedEvents.add(trip.event_id);
+        }
+      });
+    } catch (err) {
+      console.error("שגיאה בבדיקת סטטוס לנוסע:", err);
+    }
+  }, 3000);
+}
+
+function showPassengerAlert(eventTitle) {
+  const alert = document.createElement("div");
+  alert.className = "new-request-alert";
+  alert.innerHTML = `✅ אושרת לנסיעה: <strong>${eventTitle}</strong> — תוכל כעת לשלם`;
   document.body.appendChild(alert);
 
   setTimeout(() => {
