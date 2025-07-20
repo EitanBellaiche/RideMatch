@@ -67,9 +67,10 @@ async function loadDriverTrips(userId, container) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              event_id: trip.event_id,
-              user_id: currentUserId,
-            }),
+              event_id: eventId,
+              user_id: driverId,
+            })
+            ,
           });
 
 
