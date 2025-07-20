@@ -44,7 +44,7 @@ async function loadDriverTrips(userId, container) {
     <a href="driver-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
     <button class="action-button cancel-button driver-cancel-button"
             data-event="${trip.event_id}"
-            data-driver="${trip.driver_user_id}">
+            data-driver="${userId}">
       בטל נסיעה
     </button>
   `;
