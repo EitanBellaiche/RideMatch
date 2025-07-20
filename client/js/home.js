@@ -33,30 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderEvents(filtered);
   });
 
-  function renderEvents(events) {
-    eventsGrid.innerHTML = "";
-    if (events.length === 0) {
-      eventsGrid.innerHTML = "<p>לא נמצאו אירועים מתאימים.</p>";
-      return;
-    }
-
-    events.forEach(event => {
-      const article = document.createElement("article");
-      article.classList.add("event-card");
-
-      article.innerHTML = `
-        <header class="event-info">
-          <h3>${event.title}</h3>
-          <p>📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
-        </header>
-        <a href="event-details.html?id=${event.id}" class="details-button" data-event='${JSON.stringify(event)}'>צפה בפרטים</a>
-      `;
-
-      eventsGrid.appendChild(article);
-    });
-  }
-
-  // event details storage
   eventsGrid.addEventListener("click", (e) => {
     if (e.target.matches(".details-button")) {
       e.preventDefault();
@@ -65,4 +41,80 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = e.target.href;
     }
   });
+
+  // 🟢 הפעלת בדיקת התראות לנהג
+  checkPendingRequestsOnHome();
 });
+
+// ✅ הצגת אירועים
+function renderEvents(events) {
+  const eventsGrid = document.querySelector(".events-grid");
+  eventsGrid.innerHTML = "";
+
+  if (events.length === 0) {
+    eventsGrid.innerHTML = "<p>לא נמצאו אירועים מתאימים.</p>";
+    return;
+  }
+
+  events.forEach(event => {
+    const article = document.createElement("article");
+    article.classList.add("event-card");
+
+    article.innerHTML = `
+      <header class="event-info">
+        <h3>${event.title}</h3>
+        <p>📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
+      </header>
+      <a href="event-details.html?id=${event.id}" class="details-button" data-event='${JSON.stringify(event)}'>צפה בפרטים</a>
+    `;
+
+    eventsGrid.appendChild(article);
+  });
+}
+
+// ✅ התראה על בקשות ממתינות כל 3 שניות
+function checkPendingRequestsOnHome() {
+  const userId = localStorage.getItem("user_id");
+  if (!userId) return;
+
+  const notifiedEvents = new Set();
+
+  setInterval(async () => {
+    try {
+      const tripsRes = await fetch(`https://ridematch-a905.onrender.com/driver-trips?user_id=${userId}`);
+      const driverTrips = await tripsRes.json();
+
+      for (const trip of driverTrips) {
+        const eventId = trip.event_id;
+
+        if (notifiedEvents.has(eventId)) continue;
+
+        const pendingRes = await fetch(`https://ridematch-a905.onrender.com/driver-requests?event_id=${eventId}&driver_user_id=${userId}`);
+        const pending = await pendingRes.json();
+
+        if (pending.length > 0) {
+          showHomeAlert(pending[0].username); // מציג את הראשון בלבד
+          notifiedEvents.add(eventId); // לא נציג שוב את אותו האירוע
+        }
+      }
+    } catch (err) {
+      console.error("שגיאה בבדיקת בקשות ממתינות בדף הבית:", err);
+    }
+  }, 3000); // כל 3 שניות
+}
+
+// ✅ יצירת התראה במסך
+function showHomeAlert(username) {
+  if (document.querySelector(".new-request-alert")) return;
+
+  const alert = document.createElement("div");
+  alert.className = "new-request-alert";
+  alert.innerHTML = `
+    🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך!
+  `;
+  document.body.appendChild(alert);
+
+  setTimeout(() => {
+    alert.remove();
+  }, 6000); // נעלם אחרי 6 שניות
+}
