@@ -63,12 +63,15 @@ async function loadDriverTrips(userId, container) {
         try {
           const res = await fetch(`${baseUrl}/cancel-trip-by-driver`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              event_id: eventId,
-              driver_user_id: driverId
-            })
+              event_id: trip.event_id,
+              user_id: currentUserId,
+            }),
           });
+
 
           const data = await res.json();
           if (res.ok) {
@@ -115,19 +118,19 @@ async function loadPassengerTrips(userId, container) {
         const checkData = await checkRes.json();
         const status = checkData.status;
 
-       if (status === "paid") {
-  statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
-} else if (status === "approved") {
-  statusHTML = `
+        if (status === "paid") {
+          statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
+        } else if (status === "approved") {
+          statusHTML = `
     <div class="trip-badge badge-approved">💳 אושרת, שלם בבקשה</div>
     <button class="pay-now-button" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">
       שלם עכשיו
     </button>
   `;
-}
-else if (status === "pending") {
-  statusHTML = `<div class="trip-badge badge-pending">⏳ ממתין לאישור נהג</div>`;
-}
+        }
+        else if (status === "pending") {
+          statusHTML = `<div class="trip-badge badge-pending">⏳ ממתין לאישור נהג</div>`;
+        }
 
       } catch (e) {
         console.warn("שגיאה בבדיקת סטטוס:", e);
