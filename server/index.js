@@ -387,35 +387,31 @@ app.delete("/cancel-trip-by-driver", async (req, res) => {
   const { event_id, driver_user_id } = req.body;
 
   try {
-    // בדיקה האם הנהג הזה קיים ב־event_drivers
+    console.log("בקשת ביטול נסיעה", { event_id, driver_user_id });
+
+    // 1. בדוק אם הנהג הזה משויך לנסיעה
     const result = await pool.query(
       `SELECT * FROM event_drivers WHERE event_id = $1 AND user_id = $2`,
       [event_id, driver_user_id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(403).json({ message: "אין הרשאה לבטל נסיעה זו." });
+      return res.status(403).json({ message: "המשתמש אינו נהג של נסיעה זו." });
     }
 
-    // מחיקת כל הנוסעים של הנסיעה
-    await pool.query(
-      `DELETE FROM event_passengers WHERE event_id = $1 AND driver_user_id = $2`,
-      [event_id, driver_user_id]
-    );
-
-    // מחיקת הנהג מהנסיעה
+    // 2. מחק את הנהג מהנסיעה
     await pool.query(
       `DELETE FROM event_drivers WHERE event_id = $1 AND user_id = $2`,
       [event_id, driver_user_id]
     );
 
-    res.status(200).json({ message: "הנסיעה בוטלה בהצלחה על ידי הנהג." });
+    res.status(200).json({ message: "הנסיעה בוטלה בהצלחה." });
+
   } catch (err) {
-    console.error("שגיאה בביטול נסיעה ע\"י נהג:", err);
+    console.error("שגיאה בביטול נסיעה ע\"י נהג:", err.message);
     res.status(500).json({ message: "שגיאה בשרת בעת ביטול נסיעה." });
   }
 });
-
 
 
 app.listen(PORT, () => {
