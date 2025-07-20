@@ -399,7 +399,7 @@ app.delete("/cancel-trip-by-driver", async (req, res) => {
       [event_id, user_id]
     );
 
-    res.status(200).json({ message: "הנסיעה בוטלה בהצלחה." });
+    res.status(200).json({ message: "הנסיעה בוטלה בהצלחה, כל הנוסעים זוכו " });
   } catch (err) {
     console.error("שגיאה בביטול נסיעה ע\"י נהג:", err.message);
     res.status(500).json({ message: "שגיאה בביטול נסיעה." });

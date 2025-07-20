@@ -70,6 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         driversListContainer.appendChild(driverCard);
+
+        // בדוק אם המשתמש המחובר הוא הנהג
+        if (parseInt(currentUserId) === parseInt(driver.driver_user_id)) {
+          checkPendingJoinRequests(event.id, driver.driver_user_id);
+        }
       });
     });
 });
@@ -125,7 +130,6 @@ function registerToRide(eventId, driverUserId, buttonElement) {
     });
 }
 
-
 function startPaymentProcess(buttonElement, eventId, driverUserId) {
   const passengerUserId = localStorage.getItem("user_id");
 
@@ -166,4 +170,36 @@ function startPaymentProcess(buttonElement, eventId, driverUserId) {
         alert("שגיאת רשת. נסה שוב.");
       });
   }, 2000);
+}
+
+// 🔁 התראות לנהג על בקשות הצטרפות
+function checkPendingJoinRequests(eventId, driverUserId) {
+  const notified = new Set();
+
+  setInterval(async () => {
+    try {
+      const res = await fetch(`https://ridematch-a905.onrender.com/driver-requests?event_id=${eventId}&driver_user_id=${driverUserId}`);
+      const data = await res.json();
+
+      data.forEach(passenger => {
+        if (!notified.has(passenger.passenger_user_id)) {
+          showDriverAlert(passenger.username);
+          notified.add(passenger.passenger_user_id);
+        }
+      });
+    } catch (err) {
+      console.error("שגיאה בבדיקת בקשות הצטרפות:", err);
+    }
+  }, 5000);
+}
+
+function showDriverAlert(username) {
+  const alert = document.createElement("div");
+  alert.className = "new-request-alert";
+  alert.innerHTML = `🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך!`;
+  document.body.appendChild(alert);
+
+  setTimeout(() => {
+    alert.remove();
+  }, 8000);
 }
