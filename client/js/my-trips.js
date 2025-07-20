@@ -35,21 +35,21 @@ async function loadDriverTrips(userId, container) {
     }
 
     trips.forEach(trip => {
-      const tripCard = document.createElement("article");
-      tripCard.classList.add("trip-card");
-      tripCard.innerHTML = `
-        <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
-        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        <a href="driver-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
-        <button class="action-button cancel-button driver-cancel-button"
-                data-event="${trip.event_id}"
-                data-driver="${trip.driver_user_id}">
-          בטל נסיעה
-        </button>
-      `;
-      container.appendChild(tripCard);
-    });
+  const tripCard = document.createElement("article");
+  tripCard.classList.add("trip-card");
+  tripCard.innerHTML = `
+    <h3>${trip.title}</h3>
+    <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+    <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+    <a href="driver-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+    <button class="action-button cancel-button driver-cancel-button"
+            data-event="${trip.event_id}"
+            data-driver="${trip.driver_user_id}">
+      בטל נסיעה
+    </button>
+  `;
+  container.appendChild(tripCard);
+});
 
     // האזנה לביטול נסיעה ע"י נהג
     container.addEventListener("click", async (e) => {
