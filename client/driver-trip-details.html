@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>פרטי נסיעה כנהג</title>
   <link rel="stylesheet" href="css/header.css" />
   <link rel="stylesheet" href="css/my-trips.css" />
+  <link rel="stylesheet" href="css/driver-trip-details.css" />
 </head>
-<body dir="rtl">
+<body>
   <header class="main-header">
     <span class="logo">🚗 RideMatch</span>
     <nav class="nav-links">
@@ -25,10 +26,20 @@
     </section>
 
     <section class="trip-section">
+      <h2>נוסעים מאושרים</h2>
+      <div id="approved-passengers"></div>
+    </section>
+
+    <section class="trip-section">
       <h2>בקשות להצטרפות</h2>
-      <div id="passenger-requests">
-        <!-- כאן תופענה הבקשות של הנוסעים -->
-      </div>
+      <div id="passenger-requests"></div>
+    </section>
+
+    <section class="trip-section">
+      <h2>💬 צ'אט קבוצתי</h2>
+      <div id="chat-box" style="height:200px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px;"></div>
+      <input type="text" id="chat-message" placeholder="כתוב הודעה..." style="width:80%;" />
+      <button onclick="sendMessage()">שלח</button>
     </section>
   </main>
 

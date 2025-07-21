@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  direction: rtl;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  color: #FACC15;
+  margin-bottom: 2rem;
+}
+
+.trip-section {
+  margin-bottom: 3rem;
+}
+
+.trip-section h2 {
+  color: #FACC15;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.trip-card {
+  background-color: #1E293B;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.trip-card h3 {
+  color: #60A5FA;
+  margin-top: 0;
+}
+
+.trip-card p {
+  margin: 0.5rem 0;
+  color: #CBD5E1;
+}
+
+.trip-card button {
+  background-color: #10B981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.trip-card button:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+#chat-box {
+  background-color: #1E293B;
+  border-radius: 10px;
+  padding: 1rem;
+  height: 200px;
+  overflow-y: auto;
+  color: #E2E8F0;
+  margin-bottom: 1rem;
+}
+
+#chat-box p {
+  margin: 0.3rem 0;
+}
+
+#chat-message {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  width: 75%;
+  margin-left: 0.5rem;
+}
+
+button {
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #2563EB;
+}
