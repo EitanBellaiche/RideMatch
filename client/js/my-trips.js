@@ -142,7 +142,7 @@ async function loadPassengerTrips(userId, container) {
         <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
         <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        <a href="passanger-trip-details.html?id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>
         ${buttonHTML}
         ${statusHTML}
         <button class="action-button cancel-button"
