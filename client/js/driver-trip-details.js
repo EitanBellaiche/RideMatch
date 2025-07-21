@@ -35,7 +35,7 @@ try {
 
   // שלב 2: נוסעים מאושרים
   try {
-    const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${eventId}`);
+const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${eventId}&driver_user_id=${driverUserId}`);
     const approved = await approvedRes.json();
     const container = document.getElementById("approved-passengers");
 
