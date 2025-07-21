@@ -11,26 +11,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // שלב 1: פרטי נסיעה
-  try {
-    const eventRes = await fetch(`${baseUrl}/events`);
-    const allEvents = await eventRes.json();
-    const event = allEvents.find(e => e.id == eventId);
+  // שלב 1: פרטי נסיעה
+try {
+  const res = await fetch(`${baseUrl}/driver-trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
+  const trip = await res.json();
 
-    if (!event) {
-      document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
-      return;
-    }
-
-    document.getElementById("trip-details").innerHTML = `
-      <div class="trip-card">
-        <h3>${event.title}</h3>
-        <p>📅 ${event.date} ⏰ ${event.departure_time}</p>
-        <p>📍 ${event.pickup_location}</p>
-      </div>
-    `;
-  } catch (err) {
-    console.error("שגיאה בקבלת פרטי האירוע:", err);
+  if (!trip || !trip.title) {
+    document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
+    return;
   }
+
+  document.getElementById("trip-details").innerHTML = `
+    <div class="trip-card">
+      <h3>${trip.title}</h3>
+      <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
+      <p>📍 ${trip.pickup_location}</p>
+    </div>
+  `;
+} catch (err) {
+  console.error("שגיאה בקבלת פרטי הנסיעה:", err);
+}
+
 
   // שלב 2: נוסעים מאושרים
   try {

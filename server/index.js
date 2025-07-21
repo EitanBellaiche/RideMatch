@@ -471,6 +471,36 @@ app.post('/send-message', async (req, res) => {
   }
 });
 
+app.get('/driver-trip-details', async (req, res) => {
+  const { event_id, driver_user_id } = req.query;
+
+  if (!event_id || !driver_user_id) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        e.title,
+        e.day AS date,
+        ed.departure_time,
+        ed.pickup_location
+      FROM events e
+      JOIN event_drivers ed ON e.id = ed.event_id
+      WHERE e.id = $1 AND ed.user_id = $2
+    `, [event_id, driver_user_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("שגיאה בקבלת פרטי נסיעה:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
