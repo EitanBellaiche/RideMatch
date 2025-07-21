@@ -406,6 +406,70 @@ app.delete("/cancel-trip-by-driver", async (req, res) => {
   }
 });
 
+app.get('/approved-passengers', async (req, res) => {
+  const { event_id, driver_user_id } = req.query;
+
+  if (!event_id || !driver_user_id) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        ep.passenger_user_id,
+        u.username,
+        ep.status
+      FROM event_passengers ep
+      JOIN users u ON ep.passenger_user_id = u.id
+      WHERE ep.event_id = $1 AND ep.driver_user_id = $2 AND ep.status = 'paid'
+    `, [event_id, driver_user_id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("שגיאה בקבלת נוסעים מאושרים:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+app.get('/get-messages', async (req, res) => {
+  const { event_id } = req.query;
+
+  if (!event_id) {
+    return res.status(400).json({ message: "Missing event_id" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT cm.*, u.username
+      FROM chat_messages cm
+      JOIN users u ON cm.user_id = u.id
+      WHERE cm.event_id = $1
+      ORDER BY cm.timestamp ASC
+    `, [event_id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("שגיאה בקבלת הודעות:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+app.post('/send-message', async (req, res) => {
+  const { event_id, user_id, content } = req.body;
+
+  if (!event_id || !user_id || !content) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO chat_messages (event_id, user_id, content) VALUES ($1, $2, $3)`,
+      [event_id, user_id, content]
+    );
+    res.status(200).json({ message: "Message sent" });
+  } catch (err) {
+    console.error("שגיאה בשליחת הודעה:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 app.listen(PORT, () => {

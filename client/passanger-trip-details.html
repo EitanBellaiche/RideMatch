@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פרטי נסיעה</title>
+  <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/passenger-trip-details.css">
+</head>
+<body>
+  <header class="main-header">
+    <span class="logo">🚗 RideMatch</span>
+    <nav class="nav-links">
+      <a href="home.html">דף הבית</a>
+      <a href="my-trips.html">הנסיעות שלי</a>
+      <a href="my-profile.html">הפרופיל שלי</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>פרטי נסיעה</h1>
+
+    <section aria-labelledby="ride-details-title">
+      <h2 id="ride-details-title">📝 פרטי הנסיעה</h2>
+      <p id="ride-title"></p>
+      <p id="ride-date-time"></p>
+      <p id="pickup-location"></p>
+    </section>
+
+    <section aria-labelledby="participants-title">
+      <h2 id="participants-title">👥 משתתפים</h2>
+      <p id="driver-info"></p>
+      <ul id="passengers-list"></ul>
+    </section>
+
+    <section aria-labelledby="chat-title">
+      <h2 id="chat-title">💬 צ'אט קבוצתי</h2>
+      <output id="chat-box" role="log" aria-live="polite"></output>
+      <form id="chat-form">
+        <label for="chat-input" class="visually-hidden">כתוב הודעה</label>
+        <input type="text" id="chat-input" name="message" placeholder="כתוב הודעה..." required>
+        <button type="submit">שלח</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/passenger-trip-details.js"></script>
+</body>
+</html>
