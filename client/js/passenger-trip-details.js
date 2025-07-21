@@ -1,3 +1,14 @@
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const color = "#" + ((hash >> 24) & 0xFF).toString(16).padStart(2, "0") +
+    ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
+    ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
+  return color;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const params = new URLSearchParams(window.location.search);
   const eventId = params.get("event_id");
@@ -7,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!eventId || !driverUserId || !userId) {
     alert("חסרים פרטים לזיהוי הנסיעה או המשתמש");
     return;
- }
+  }
 
   try {
     const res = await fetch(`/drivers/${eventId}`);
@@ -46,13 +57,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       const chatBox = document.getElementById("chat-box");
 
       const isAtBottom = chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 5;
-      chatBox.innerHTML = ""; 
+      chatBox.innerHTML = "";
 
       messages.forEach(msg => {
         const p = document.createElement("p");
         p.classList.add("chat-message");
         p.classList.add(msg.user_id == userId ? "chat-own" : "chat-other");
-        p.innerHTML = `<strong>${msg.username}:</strong> ${msg.content}`;
+        const color = stringToColor(msg.username);
+        p.innerHTML = `<strong style="color:${color}">${msg.username}:</strong> ${msg.content}`;
         chatBox.appendChild(p);
       });
 
@@ -67,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadMessages();
   setInterval(loadMessages, 5000);
 
-  
+
   document.getElementById("chat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const input = document.getElementById("chat-input");
@@ -82,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       input.value = "";
-      loadMessages(); 
+      loadMessages();
     } catch (err) {
       console.error("שגיאה בשליחת הודעה:", err);
     }

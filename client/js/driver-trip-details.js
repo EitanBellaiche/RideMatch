@@ -1,5 +1,17 @@
 const baseUrl = "https://ridematch-a905.onrender.com";
 
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const color = "#" + ((hash >> 24) & 0xFF).toString(16).padStart(2, "0") +
+                      ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
+                      ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
+  return color;
+}
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event_id");
@@ -114,11 +126,16 @@ async function loadMessages(eventId) {
     const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}`);
     const messages = await res.json();
     const box = document.getElementById("chat-box");
-    box.innerHTML = messages.map(m => `<p><strong>${m.username}:</strong> ${m.content}</p>`).join("");
+    
+    box.innerHTML = messages.map(m => {
+      const color = stringToColor(m.username);
+      return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
+    }).join("");
   } catch (err) {
     console.error("שגיאה בטעינת הודעות:", err);
   }
 }
+
 
 async function sendMessage() {
   const eventId = new URLSearchParams(window.location.search).get("event_id");

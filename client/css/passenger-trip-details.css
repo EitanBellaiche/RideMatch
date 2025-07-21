@@ -85,18 +85,19 @@ ul#passengers-list li {
 }
 
 .chat-own {
-  background-color: #2563EB; /* כחול */
+  background-color: #2563EB; 
   color: white;
-  align-self: flex-start;
+  align-self: flex-end;     
   text-align: right;
 }
 
 .chat-other {
-  background-color: #334155; /* כהה */
+  background-color: #334155; 
   color: #E5E7EB;
-  align-self: flex-end;
+  align-self: flex-start;   
   text-align: right;
 }
+
 
 #chat-form {
   display: flex;
