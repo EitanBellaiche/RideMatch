@@ -35,9 +35,9 @@ async function loadDriverTrips(userId, container) {
     }
 
     trips.forEach(trip => {
-  const tripCard = document.createElement("article");
-  tripCard.classList.add("trip-card");
-  tripCard.innerHTML = `
+      const tripCard = document.createElement("article");
+      tripCard.classList.add("trip-card");
+      tripCard.innerHTML = `
     <h3>${trip.title}</h3>
     <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
     <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
@@ -48,8 +48,8 @@ async function loadDriverTrips(userId, container) {
       בטל נסיעה
     </button>
   `;
-  container.appendChild(tripCard);
-});
+      container.appendChild(tripCard);
+    });
 
     // האזנה לביטול נסיעה ע"י נהג
     container.addEventListener("click", async (e) => {
@@ -113,11 +113,11 @@ async function loadPassengerTrips(userId, container) {
 
       let buttonHTML = "";
       let statusHTML = "";
-
+      let status = ""
       try {
         const checkRes = await fetch(`${baseUrl}/check-registration?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}&passenger_user_id=${userId}`);
         const checkData = await checkRes.json();
-        const status = checkData.status;
+        status = checkData.status;
 
         if (status === "paid") {
           statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
@@ -137,20 +137,26 @@ async function loadPassengerTrips(userId, container) {
         console.warn("שגיאה בבדיקת סטטוס:", e);
       }
 
+      let detailsButtonHTML = "";
+if (status === "paid") {
+  detailsButtonHTML = `<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>`;
+}
+
+
       tripCard.innerHTML = `
-        <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
-        <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
-        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>
-        ${buttonHTML}
-        ${statusHTML}
-        <button class="action-button cancel-button"
-                data-event="${trip.event_id}"
-                data-driver="${trip.driver_user_id}">
-          בטל הרשמה
-        </button>
-      `;
+  <h3>${trip.title}</h3>
+  <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+  <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
+  <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+  ${detailsButtonHTML}
+  ${buttonHTML}
+  ${statusHTML}
+  <button class="action-button cancel-button"
+          data-event="${trip.event_id}"
+          data-driver="${trip.driver_user_id}">
+    בטל הרשמה
+  </button>
+`;
 
       container.appendChild(tripCard);
     }

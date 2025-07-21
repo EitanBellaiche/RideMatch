@@ -136,3 +136,9 @@ main {
 .pay-now-button:hover {
   background-color: #FACC15;
 }
+.details-button[disabled] {
+  cursor: not-allowed;
+  background-color: #6b7280; /* אפור */
+  color: #d1d5db;
+  opacity: 0.6;
+}
