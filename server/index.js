@@ -500,6 +500,51 @@ app.get('/driver-trip-details', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
+app.post('/submit-review', async (req, res) => {
+  const { event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment } = req.body;
+
+  if (!event_id || !reviewer_user_id || !reviewee_user_id || !reviewer_role || !rating || !comment) {
+    return res.status(400).json({ message: "חסרים שדות נדרשים" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO ride_reviews 
+        (event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (event_id, reviewer_user_id, reviewee_user_id) DO NOTHING`,
+      [event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment]
+    );
+    res.status(200).json({ message: "הביקורת נשמרה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בשמירת ביקורת:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
+app.get('/completed-trips', async (req, res) => {
+  const { user_id } = req.query;
+  try {
+    const result = await pool.query(`
+      SELECT e.*, ed.departure_time, ed.user_id AS driver_id, 'driver' AS role
+      FROM events e
+      JOIN event_drivers ed ON e.id = ed.event_id
+      WHERE ed.user_id = $1 AND e.event_date < CURRENT_DATE
+
+      UNION
+
+      SELECT e.*, ed.departure_time, ed.user_id AS driver_id, 'passenger' AS role
+      FROM events e
+      JOIN event_passengers ep ON e.id = ep.event_id
+      JOIN event_drivers ed ON ed.event_id = e.id
+      WHERE ep.user_id = $1 AND e.event_date < CURRENT_DATE
+    `, [user_id]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching completed trips:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 
 app.listen(PORT, () => {
