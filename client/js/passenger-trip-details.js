@@ -115,16 +115,20 @@ function renderReviewForm() {
   console.log("📌 נכנסנו לפונקציית renderReviewForm");
 
   const container = document.getElementById("review-section");
-  container.innerHTML += `
-    <form id="review-form">
-      <label for="rating">דירוג (1 עד 5):</label><br>
-      <input type="number" id="rating" min="1" max="5" required><br><br>
+  container.innerHTML = `
+    <div class="review-box">
+      <h2>⭐ דרג את הנהג</h2>
+      <hr>
+      <form id="review-form">
+        <label for="rating">דירוג (1 עד 5):</label>
+        <input type="number" id="rating" min="1" max="5" required>
 
-      <label for="comment">הערה (לא חובה):</label><br>
-      <textarea id="comment" rows="3" cols="40"></textarea><br><br>
+        <label for="comment">הערה (לא חובה):</label>
+        <textarea id="comment" rows="3"></textarea>
 
-      <button type="submit">שלח ביקורת</button>
-    </form>
+        <button type="submit">שלח ביקורת</button>
+      </form>
+    </div>
   `;
 
   document.getElementById("review-form").addEventListener("submit", async (e) => {
@@ -138,8 +142,9 @@ function renderReviewForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event_id: eventId,
-          reviewer_id: userId,
-          reviewed_user_id: driverUserId,
+          reviewer_user_id: userId,
+          reviewee_user_id: driverUserId,
+          reviewer_role: 'passenger', // הוספנו שזה מצד נוסע
           rating,
           comment
         })

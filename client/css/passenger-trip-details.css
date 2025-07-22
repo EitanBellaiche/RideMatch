@@ -151,35 +151,54 @@ ul#passengers-list li {
     width: 100%;
   }
 }
+#review-section {
+  margin-top: 1rem;
+}
+
 #review-form {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 12px;
 }
 
 #review-form label {
-  color: #E2E8F0;
+  color: #F8FAFC;
   font-weight: bold;
+  font-size: 1rem;
 }
 
-#review-form input,
+#review-form input[type="number"],
 #review-form textarea {
-  padding: 10px;
+  width: 100%;
+  padding: 10px 14px;
   border-radius: 8px;
-  border: none;
+  border: 1px solid #334155;
   background-color: #1E293B;
   color: white;
   font-size: 1rem;
+  resize: none;
+  transition: border-color 0.3s;
+}
+
+#review-form input[type="number"]:focus,
+#review-form textarea:focus {
+  outline: none;
+  border-color: #38bdf8;
 }
 
 #review-form button {
   background-color: #22C55E;
   color: white;
   font-weight: bold;
-  padding: 10px;
+  padding: 12px;
   border: none;
   border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s;
 }
