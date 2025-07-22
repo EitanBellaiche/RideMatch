@@ -14,11 +14,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   passengerSection.className = "trip-section passenger-trips";
   passengerSection.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
 
+  const pastSection = document.createElement("section");
+pastSection.className = "trip-section past-trips";
+pastSection.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
+
+document.querySelector("main").appendChild(pastSection);
   document.querySelector("main").appendChild(driverSection);
   document.querySelector("main").appendChild(passengerSection);
 
   loadDriverTrips(userId, driverSection);
   loadPassengerTrips(userId, passengerSection);
+  loadPastTrips(userId, pastSection);
 });
 
 const baseUrl = "https://ridematch-a905.onrender.com";
@@ -200,6 +206,74 @@ if (status === "paid") {
   } catch (err) {
     console.error("שגיאה בטעינת נסיעות כנוסע:", err);
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנוסע</p>";
+  }
+}
+async function loadPastTrips(userId, container) {
+  try {
+    const res = await fetch(`${baseUrl}/past-trips?user_id=${userId}`);
+    if (!res.ok) throw new Error("שגיאה בטעינת נסיעות שהסתיימו");
+    const trips = await res.json();
+
+    if (trips.length === 0) {
+      container.innerHTML += "<p>אין נסיעות שהסתיימו להצגה.</p>";
+      return;
+    }
+
+    for (const trip of trips) {
+      const tripCard = document.createElement("article");
+      tripCard.classList.add("trip-card");
+
+      tripCard.innerHTML = `
+        <h3>${trip.title}</h3>
+        <p>📅 תאריך: ${trip.event_date}</p>
+        <p>🧑‍✈️ תפקידך: ${trip.role === 'driver' ? 'נהג' : 'נוסע'}</p>
+        <button class="action-button review-button" 
+                data-event="${trip.event_id}" 
+                data-role="${trip.role}">
+          הוסף ביקורת
+        </button>
+      `;
+
+      container.appendChild(tripCard);
+    }
+
+    container.addEventListener("click", (e) => {
+      if (e.target.classList.contains("review-button")) {
+        const eventId = e.target.dataset.event;
+        const role = e.target.dataset.role;
+        const targetRole = role === "driver" ? "passenger" : "driver";
+        const revieweeId = prompt("הזן את מזהה המשתמש שברצונך לדרג:");
+
+        if (!revieweeId) return;
+
+        const rating = prompt("דרג מ־1 עד 5:");
+        const comment = prompt("הוסף תגובה:");
+
+        if (!rating || !comment) return;
+
+        fetch(`${baseUrl}/submit-review`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event_id: eventId,
+            reviewer_user_id: userId,
+            reviewee_user_id: revieweeId,
+            reviewer_role: role,
+            rating,
+            comment
+          })
+        })
+          .then(res => res.json())
+          .then(data => alert(data.message))
+          .catch(err => {
+            console.error("שגיאה בשליחת ביקורת:", err);
+            alert("שגיאה בשליחת ביקורת");
+          });
+      }
+    });
+  } catch (err) {
+    console.error("שגיאה בטעינת נסיעות שהסתיימו:", err);
+    container.innerHTML += "<p style='color:red;'>שגיאה בטעינה</p>";
   }
 }
 

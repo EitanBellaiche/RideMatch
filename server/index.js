@@ -191,16 +191,20 @@ app.post('/join-ride', async (req, res) => {
   }
 });
 
-// נסיעות כנהג
 app.get('/driver-trips', async (req, res) => {
   const { user_id } = req.query;
   try {
     const result = await pool.query(`
-      SELECT e.id as event_id, e.title, e.day AS date, ed.departure_time, ed.pickup_location
-FROM event_drivers ed
-JOIN events e ON ed.event_id = e.id
-WHERE ed.user_id = $1
-
+      SELECT 
+        e.id as event_id, 
+        e.title, 
+        e.day AS date, 
+        ed.departure_time, 
+        ed.pickup_location
+      FROM event_drivers ed
+      JOIN events e ON ed.event_id = e.id
+      WHERE ed.user_id = $1
+        AND e.event_date >= CURRENT_DATE
     `, [user_id]);
 
     res.json(result.rows);
@@ -210,25 +214,27 @@ WHERE ed.user_id = $1
   }
 });
 
+
 app.get('/passenger-trips', async (req, res) => {
   const { user_id } = req.query;
   try {
     const result = await pool.query(`
-  SELECT 
-    e.id AS event_id,
-    e.title,
-    e.day AS date,
-    ed.departure_time,
-    ed.pickup_location,
-    u.username AS driver_name,
-    ed.user_id AS driver_user_id,
-    ep.status
-  FROM event_passengers ep
-  JOIN events e ON ep.event_id = e.id
-  JOIN event_drivers ed ON ep.driver_user_id = ed.user_id AND ep.event_id = ed.event_id
-  JOIN users u ON ed.user_id = u.id
-  WHERE ep.passenger_user_id = $1
-`, [user_id]);
+      SELECT 
+        e.id AS event_id,
+        e.title,
+        e.day AS date,
+        ed.departure_time,
+        ed.pickup_location,
+        u.username AS driver_name,
+        ed.user_id AS driver_user_id,
+        ep.status
+      FROM event_passengers ep
+      JOIN events e ON ep.event_id = e.id
+      JOIN event_drivers ed ON ep.driver_user_id = ed.user_id AND ep.event_id = ed.event_id
+      JOIN users u ON ed.user_id = u.id
+      WHERE ep.passenger_user_id = $1
+        AND e.event_date >= CURRENT_DATE
+    `, [user_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -500,6 +506,33 @@ app.get('/driver-trip-details', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 });
+
+app.get('/past-trips', async (req, res) => {
+  const { user_id } = req.query;
+
+  try {
+    const driverTrips = await pool.query(`
+      SELECT e.id AS event_id, e.title, e.event_date, 'driver' AS role
+      FROM event_drivers ed
+      JOIN events e ON ed.event_id = e.id
+      WHERE ed.user_id = $1 AND e.event_date < CURRENT_DATE
+    `, [user_id]);
+
+    const passengerTrips = await pool.query(`
+      SELECT e.id AS event_id, e.title, e.event_date, 'passenger' AS role
+      FROM event_passengers ep
+      JOIN events e ON ep.event_id = e.id
+      WHERE ep.passenger_user_id = $1 AND e.event_date < CURRENT_DATE
+    `, [user_id]);
+
+    const allTrips = [...driverTrips.rows, ...passengerTrips.rows];
+    res.json(allTrips);
+  } catch (err) {
+    console.error("שגיאה בקבלת נסיעות שהסתיימו:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
+});
+
 app.post('/submit-review', async (req, res) => {
   const { event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment } = req.body;
 
