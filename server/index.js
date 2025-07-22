@@ -105,32 +105,24 @@ app.post('/add-driver', async (req, res) => {
   }
 });
 
-app.get('/drivers/:eventId', async (req, res) => {
-  const eventId = req.params.eventId;
+const driversResult = await pool.query(
+  `SELECT 
+     u.id AS driver_user_id,
+     u.username, 
+     ed.departure_time, 
+     ed.price, 
+     ed.car_model, 
+     ed.car_color, 
+     ed.pickup_location, 
+     ed.seats_available,
+     e.event_date
+   FROM users u
+   JOIN event_drivers ed ON u.id = ed.user_id
+   JOIN events e ON ed.event_id = e.id
+   WHERE ed.event_id = $1`,
+  [eventId]
+);
 
-  try {
-    const driversResult = await pool.query(
-      `SELECT 
-         u.id AS driver_user_id,
-         u.username, 
-         ed.departure_time, 
-         ed.price, 
-         ed.car_model, 
-         ed.car_color, 
-         ed.pickup_location, 
-         ed.seats_available
-       FROM users u
-       JOIN event_drivers ed ON u.id = ed.user_id
-       WHERE ed.event_id = $1`,
-      [eventId]
-    );
-
-    res.status(200).json(driversResult.rows);
-  } catch (error) {
-    console.error('שגיאה בקבלת הנהגים:', error);
-    res.status(500).json({ message: 'שגיאה בשרת בקבלת הנהגים' });
-  }
-});
 
 
 app.post('/join-ride', async (req, res) => {

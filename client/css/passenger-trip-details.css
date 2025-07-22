@@ -151,3 +151,39 @@ ul#passengers-list li {
     width: 100%;
   }
 }
+#review-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#review-form label {
+  color: #E2E8F0;
+  font-weight: bold;
+}
+
+#review-form input,
+#review-form textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background-color: #1E293B;
+  color: white;
+  font-size: 1rem;
+}
+
+#review-form button {
+  background-color: #22C55E;
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#review-form button:hover {
+  background-color: #16A34A;
+}

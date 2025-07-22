@@ -34,12 +34,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
  const tripDate = new Date(driver.event_date); // רק תאריך
 const today = new Date();
-today.setHours(0, 0, 0, 0);         // אפס את השעה של היום
-tripDate.setHours(0, 0, 0, 0);     // אפס את השעה של תאריך הנסיעה
-
-if (tripDate < today) {
+const now = new Date();
+if (tripDate < now) {
   renderReviewForm();
 }
+
 
 
 
