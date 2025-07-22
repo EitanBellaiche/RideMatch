@@ -515,9 +515,8 @@ app.get('/past-trips', async (req, res) => {
       SELECT 
         e.id AS event_id,
         e.title,
-        e.date_and_time,
-        TO_CHAR(e.date_and_time, 'YYYY-MM-DD') AS date,
-        TO_CHAR(e.date_and_time, 'HH24:MI') AS departure_time,
+        e.event_date,
+        e.time AS departure_time,
         ed.user_id AS driver_user_id,
         u.username AS driver_name,
         ed.pickup_location,
@@ -526,15 +525,15 @@ app.get('/past-trips', async (req, res) => {
           WHEN ep.passenger_user_id = $1 AND ep.status IS NOT NULL THEN ep.status
           ELSE NULL 
         END AS passenger_status
-      FROM dbShnkr24stud.tbl_events e
+      FROM dbShnkr24stud.events e
       LEFT JOIN dbShnkr24stud.tbl_event_drivers ed ON e.id = ed.event_id
       LEFT JOIN dbShnkr24stud.users u ON ed.user_id = u.id
       LEFT JOIN dbShnkr24stud.tbl_event_passengers ep 
         ON e.id = ep.event_id AND ep.passenger_user_id = $1
       WHERE 
         (ed.user_id = $1 OR ep.passenger_user_id = $1)
-        AND e.date_and_time < CURRENT_TIMESTAMP
-      ORDER BY e.date_and_time DESC
+        AND e.event_date < CURRENT_DATE
+      ORDER BY e.event_date DESC
     `;
 
     const result = await pool.query(query, [userId]);
@@ -544,6 +543,7 @@ app.get('/past-trips', async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשליפת נסיעות שהסתיימו' });
   }
 });
+
 
 app.post('/submit-review', async (req, res) => {
   const { event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment } = req.body;
