@@ -99,3 +99,19 @@ button {
 button:hover {
   background-color: #2563EB;
 }
+
+.trip-card textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: none;
+  margin-top: 0.5rem;
+  resize: vertical;
+}
+
+.trip-card select {
+  margin-top: 0.5rem;
+  padding: 0.3rem;
+  font-size: 1rem;
+  border-radius: 6px;
+}

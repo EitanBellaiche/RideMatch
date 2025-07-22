@@ -562,7 +562,7 @@ app.post('/submit-review', async (req, res) => {
 
   try {
     await pool.query(`
-      INSERT INTO reviews 
+      INSERT INTO ride_reviews 
         (event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment, submitted_at)
       VALUES ($1, $2, $3, $4, $5, $6, NOW())
     `, [

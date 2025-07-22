@@ -1,4 +1,6 @@
 const baseUrl = "https://ridematch-a905.onrender.com";
+let isPastTrip = false;  
+
 
 function stringToColor(str) {
   let hash = 0;
@@ -22,14 +24,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // שלב 1: פרטי נסיעה
-  // שלב 1: פרטי נסיעה
+  
 try {
   const res = await fetch(`${baseUrl}/driver-trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
   const trip = await res.json();
   const tripDate = new Date(trip.event_date);
 const now = new Date();
-const isPastTrip = tripDate < now;
+isPastTrip = tripDate < now;
 
 
   if (!trip || !trip.title) {
