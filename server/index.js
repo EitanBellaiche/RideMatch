@@ -508,28 +508,40 @@ app.get('/driver-trip-details', async (req, res) => {
 });
 
 app.get('/past-trips', async (req, res) => {
-  const { user_id } = req.query;
+  const userId = req.query.user_id;
 
   try {
-    const driverTrips = await pool.query(`
-      SELECT e.id AS event_id, e.title, e.event_date, 'driver' AS role
-      FROM event_drivers ed
-      JOIN events e ON ed.event_id = e.id
-      WHERE ed.user_id = $1 AND e.event_date < CURRENT_DATE
-    `, [user_id]);
+    const query = `
+      SELECT 
+        e.id AS event_id,
+        e.title,
+        e.date_and_time,
+        TO_CHAR(e.date_and_time, 'YYYY-MM-DD') AS date,
+        TO_CHAR(e.date_and_time, 'HH24:MI') AS departure_time,
+        ed.user_id AS driver_user_id,
+        u.username AS driver_name,
+        ed.pickup_location,
+        CASE WHEN ed.user_id = $1 THEN TRUE ELSE FALSE END AS is_driver,
+        CASE 
+          WHEN ep.passenger_user_id = $1 AND ep.status IS NOT NULL THEN ep.status
+          ELSE NULL 
+        END AS passenger_status
+      FROM dbShnkr24stud.tbl_events e
+      LEFT JOIN dbShnkr24stud.tbl_event_drivers ed ON e.id = ed.event_id
+      LEFT JOIN dbShnkr24stud.users u ON ed.user_id = u.id
+      LEFT JOIN dbShnkr24stud.tbl_event_passengers ep 
+        ON e.id = ep.event_id AND ep.passenger_user_id = $1
+      WHERE 
+        (ed.user_id = $1 OR ep.passenger_user_id = $1)
+        AND e.date_and_time < CURRENT_TIMESTAMP
+      ORDER BY e.date_and_time DESC
+    `;
 
-    const passengerTrips = await pool.query(`
-      SELECT e.id AS event_id, e.title, e.event_date, 'passenger' AS role
-      FROM event_passengers ep
-      JOIN events e ON ep.event_id = e.id
-      WHERE ep.passenger_user_id = $1 AND e.event_date < CURRENT_DATE
-    `, [user_id]);
-
-    const allTrips = [...driverTrips.rows, ...passengerTrips.rows];
-    res.json(allTrips);
+    const result = await pool.query(query, [userId]);
+    res.json(result.rows);
   } catch (err) {
-    console.error("שגיאה בקבלת נסיעות שהסתיימו:", err);
-    res.status(500).json({ message: "שגיאה בשרת" });
+    console.error('שגיאה בשליפת נסיעות שהסתיימו:', err);
+    res.status(500).json({ message: 'שגיאה בשליפת נסיעות שהסתיימו' });
   }
 });
 

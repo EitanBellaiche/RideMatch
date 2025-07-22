@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   passengerSection.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
 
   const pastSection = document.createElement("section");
-pastSection.className = "trip-section past-trips";
-pastSection.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
+  pastSection.className = "trip-section past-trips";
+  pastSection.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
 
-document.querySelector("main").appendChild(pastSection);
+  document.querySelector("main").appendChild(pastSection);
   document.querySelector("main").appendChild(driverSection);
   document.querySelector("main").appendChild(passengerSection);
 
@@ -144,9 +144,9 @@ async function loadPassengerTrips(userId, container) {
       }
 
       let detailsButtonHTML = "";
-if (status === "paid") {
-  detailsButtonHTML = `<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>`;
-}
+      if (status === "paid") {
+        detailsButtonHTML = `<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>`;
+      }
 
 
       tripCard.innerHTML = `
@@ -211,11 +211,11 @@ if (status === "paid") {
 async function loadPastTrips(userId, container) {
   try {
     const res = await fetch(`${baseUrl}/past-trips?user_id=${userId}`);
-    if (!res.ok) throw new Error("שגיאה בטעינת נסיעות שהסתיימו");
+    if (!res.ok) throw new Error("בעיה בטעינת נסיעות שהסתיימו");
     const trips = await res.json();
 
     if (trips.length === 0) {
-      container.innerHTML += "<p>אין נסיעות שהסתיימו להצגה.</p>";
+      container.innerHTML += "<p>אין נסיעות שהסתיימו.</p>";
       return;
     }
 
@@ -225,57 +225,112 @@ async function loadPastTrips(userId, container) {
 
       tripCard.innerHTML = `
         <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.event_date}</p>
-        <p>🧑‍✈️ תפקידך: ${trip.role === 'driver' ? 'נהג' : 'נוסע'}</p>
-        <button class="action-button review-button" 
-                data-event="${trip.event_id}" 
-                data-role="${trip.role}">
-          הוסף ביקורת
-        </button>
+        <p>📅 תאריך: ${trip.date} | 🕒 ${trip.departure_time}</p>
+        <p>🚘 נהג: ${trip.driver_name || '---'}</p>
+        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
       `;
+
+      // כנהג
+      if (trip.is_driver) {
+        tripCard.innerHTML += `
+          <a href="driver-trip-details.html?event_id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+          <button class="action-button cancel-button driver-cancel-button"
+                  data-event="${trip.event_id}"
+                  data-driver="${userId}">
+            בטל נסיעה
+          </button>
+        `;
+      }
+
+      // כנוסע
+      if (!trip.is_driver && trip.passenger_status) {
+        tripCard.innerHTML += `
+          <a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>
+          <button class="action-button cancel-button"
+                  data-event="${trip.event_id}"
+                  data-driver="${trip.driver_user_id}">
+            בטל הרשמה
+          </button>
+        `;
+      }
 
       container.appendChild(tripCard);
     }
 
-    container.addEventListener("click", (e) => {
-      if (e.target.classList.contains("review-button")) {
+    // טיפול בכפתורי ביטול
+    container.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("cancel-button")) {
         const eventId = e.target.dataset.event;
-        const role = e.target.dataset.role;
-        const targetRole = role === "driver" ? "passenger" : "driver";
-        const revieweeId = prompt("הזן את מזהה המשתמש שברצונך לדרג:");
+        const driverId = e.target.dataset.driver;
 
-        if (!revieweeId) return;
+        const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל?");
+        if (!confirmCancel) return;
 
-        const rating = prompt("דרג מ־1 עד 5:");
-        const comment = prompt("הוסף תגובה:");
+        const endpoint = e.target.classList.contains("driver-cancel-button")
+          ? "/cancel-trip-by-driver"
+          : "/cancel-ride";
 
-        if (!rating || !comment) return;
+        const body = e.target.classList.contains("driver-cancel-button")
+          ? { event_id: eventId, user_id: userId }
+          : { event_id: eventId, driver_user_id: driverId, passenger_user_id: userId };
 
-        fetch(`${baseUrl}/submit-review`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event_id: eventId,
-            reviewer_user_id: userId,
-            reviewee_user_id: revieweeId,
-            reviewer_role: role,
-            rating,
-            comment
-          })
-        })
-          .then(res => res.json())
-          .then(data => alert(data.message))
-          .catch(err => {
-            console.error("שגיאה בשליחת ביקורת:", err);
-            alert("שגיאה בשליחת ביקורת");
+        try {
+          const res = await fetch(`${baseUrl}${endpoint}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
           });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert(data.message || "עודכן בהצלחה");
+            container.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
+            loadPastTrips(userId, container); // רענון
+          } else {
+            alert(data.message || "שגיאה בביטול");
+          }
+        } catch (err) {
+          console.error("שגיאה:", err);
+          alert("שגיאה בביטול");
+        }
       }
     });
+
   } catch (err) {
     console.error("שגיאה בטעינת נסיעות שהסתיימו:", err);
-    container.innerHTML += "<p style='color:red;'>שגיאה בטעינה</p>";
+    container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות שהסתיימו</p>";
   }
 }
+
+
+function submitReview(eventId, reviewerUserId, revieweeUserId, reviewerRole) {
+  const rating = parseInt(prompt("דרג בין 1 ל-5:"));
+  const comment = prompt("הזן תגובה:");
+
+  if (!rating || !comment) return;
+
+  fetch(`${baseUrl}/add-review`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event_id: eventId,
+      reviewer_user_id: reviewerUserId,
+      reviewee_user_id: revieweeUserId,
+      reviewer_role: reviewerRole,
+      rating,
+      comment
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || "הביקורת נוספה בהצלחה");
+    })
+    .catch(err => {
+      console.error("שגיאה בשליחת הביקורת:", err);
+      alert("שגיאה בשליחת הביקורת");
+    });
+}
+
 
 function startPaymentProcess(buttonElement, eventId, driverUserId) {
   const passengerUserId = localStorage.getItem("user_id");
