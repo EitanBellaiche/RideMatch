@@ -18,9 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   pastSection.className = "trip-section past-trips";
   pastSection.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
 
-  document.querySelector("main").appendChild(pastSection);
   document.querySelector("main").appendChild(driverSection);
   document.querySelector("main").appendChild(passengerSection);
+  document.querySelector("main").appendChild(pastSection);
 
   loadDriverTrips(userId, driverSection);
   loadPassengerTrips(userId, passengerSection);
