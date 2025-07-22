@@ -525,10 +525,10 @@ app.get('/past-trips', async (req, res) => {
           WHEN ep.passenger_user_id = $1 AND ep.status IS NOT NULL THEN ep.status
           ELSE NULL 
         END AS passenger_status
-      FROM dbShnkr24stud.events e
-      LEFT JOIN dbShnkr24stud.tbl_event_drivers ed ON e.id = ed.event_id
-      LEFT JOIN dbShnkr24stud.users u ON ed.user_id = u.id
-      LEFT JOIN dbShnkr24stud.tbl_event_passengers ep 
+      FROM events e
+      LEFT JOIN tbl_event_drivers ed ON e.id = ed.event_id
+      LEFT JOIN users u ON ed.user_id = u.id
+      LEFT JOIN tbl_event_passengers ep 
         ON e.id = ep.event_id AND ep.passenger_user_id = $1
       WHERE 
         (ed.user_id = $1 OR ep.passenger_user_id = $1)
