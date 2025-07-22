@@ -487,13 +487,15 @@ app.get('/driver-trip-details', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-        e.title,
-        e.day AS date,
-        ed.departure_time,
-        ed.pickup_location
-      FROM events e
-      JOIN event_drivers ed ON e.id = ed.event_id
-      WHERE e.id = $1 AND ed.user_id = $2
+  e.title,
+  e.day AS date,
+  e.event_date,
+  ed.departure_time,
+  ed.pickup_location
+FROM events e
+JOIN event_drivers ed ON e.id = ed.event_id
+WHERE e.id = $1 AND ed.user_id = $2
+
     `, [event_id, driver_user_id]);
 
     if (result.rows.length === 0) {
@@ -544,28 +546,41 @@ app.get('/past-trips', async (req, res) => {
   }
 });
 
-
 app.post('/submit-review', async (req, res) => {
-  const { event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment } = req.body;
+  const {
+    event_id,
+    reviewer_user_id,
+    reviewee_user_id,
+    reviewer_role,
+    rating,
+    comment
+  } = req.body;
 
-  if (!event_id || !reviewer_user_id || !reviewee_user_id || !reviewer_role || !rating || !comment) {
-    return res.status(400).json({ message: "חסרים שדות נדרשים" });
+  if (!event_id || !reviewer_user_id || !reviewee_user_id || !reviewer_role || !rating) {
+    return res.status(400).json({ message: "חסרים שדות חובה" });
   }
 
   try {
-    await pool.query(
-      `INSERT INTO ride_reviews 
-        (event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (event_id, reviewer_user_id, reviewee_user_id) DO NOTHING`,
-      [event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment]
-    );
-    res.status(200).json({ message: "הביקורת נשמרה בהצלחה" });
+    await pool.query(`
+      INSERT INTO reviews 
+        (event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment, submitted_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+    `, [
+      event_id,
+      reviewer_user_id,
+      reviewee_user_id,
+      reviewer_role,
+      rating,
+      comment
+    ]);
+
+    res.status(200).json({ message: "הביקורת נשמרה בהצלחה!" });
   } catch (err) {
     console.error("שגיאה בשמירת ביקורת:", err);
-    res.status(500).json({ message: "שגיאה בשרת" });
+    res.status(500).json({ message: "שגיאה בשרת בשמירת הביקורת" });
   }
 });
+
 
 
 app.listen(PORT, () => {

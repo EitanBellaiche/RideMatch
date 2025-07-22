@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 try {
   const res = await fetch(`${baseUrl}/driver-trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
   const trip = await res.json();
+  const tripDate = new Date(trip.event_date);
+const now = new Date();
+const isPastTrip = tripDate < now;
+
 
   if (!trip || !trip.title) {
     document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
@@ -55,11 +59,33 @@ const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${event
       container.innerHTML = "<p>אין נוסעים מאושרים עדיין.</p>";
     } else {
       approved.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "trip-card";
-        div.innerHTML = `<p><strong>👤 ${p.username}</strong></p>`;
-        container.appendChild(div);
-      });
+  const div = document.createElement("div");
+  div.className = "trip-card";
+
+  div.innerHTML = `
+    <p><strong>👤 ${p.username}</strong></p>
+    ${isPastTrip ? `
+      <label>⭐ דירוג:
+        <select id="rating-${p.passenger_user_id}">
+          <option value="1">⭐</option>
+          <option value="2">⭐⭐</option>
+          <option value="3">⭐⭐⭐</option>
+          <option value="4">⭐⭐⭐⭐</option>
+          <option value="5">⭐⭐⭐⭐⭐</option>
+        </select>
+      </label>
+      <br>
+      <textarea id="comment-${p.passenger_user_id}" placeholder="הוסף תגובה" rows="2"></textarea>
+      <br>
+      <button onclick="submitReview(${eventId}, ${driverUserId}, ${p.passenger_user_id}, 'driver')">
+        שלח ביקורת
+      </button>
+    ` : ''}
+  `;
+
+  container.appendChild(div);
+});
+
     }
   } catch (err) {
     console.error("שגיאה בטעינת נוסעים מאושרים:", err);
@@ -154,5 +180,34 @@ async function sendMessage() {
     loadMessages(eventId);
   } catch (err) {
     console.error("שגיאה בשליחת הודעה:", err);
+  }
+}
+async function submitReview(eventId, reviewerId, revieweeId, reviewerRole) {
+  const rating = document.getElementById(`rating-${revieweeId}`).value;
+  const comment = document.getElementById(`comment-${revieweeId}`).value;
+
+  try {
+    const res = await fetch(`${baseUrl}/submit-review`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: eventId,
+        reviewer_user_id: reviewerId,
+        reviewee_user_id: revieweeId,
+        reviewer_role: reviewerRole,
+        rating,
+        comment
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("הביקורת נשלחה בהצלחה!");
+    } else {
+      alert(data.message || "שגיאה בשליחת ביקורת");
+    }
+  } catch (err) {
+    console.error("שגיאה בשליחת ביקורת:", err);
+    alert("שגיאה בעת שליחת הביקורת");
   }
 }

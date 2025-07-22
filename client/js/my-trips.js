@@ -25,9 +25,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadDriverTrips(userId, driverSection);
   loadPassengerTrips(userId, passengerSection);
   loadPastTrips(userId, pastSection);
+
+  // האזנה לכל כפתורי הביקורת מכל הקטע
+  document.querySelector("main").addEventListener("click", (e) => {
+    handleReviewClick(e, userId);
+  });
 });
 
 const baseUrl = "https://ridematch-a905.onrender.com";
+
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // ינואר זה 0
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+}
 
 async function loadDriverTrips(userId, container) {
   try {
@@ -57,7 +70,6 @@ async function loadDriverTrips(userId, container) {
       container.appendChild(tripCard);
     });
 
-    // האזנה לביטול נסיעה ע"י נהג
     container.addEventListener("click", async (e) => {
       if (e.target.classList.contains("driver-cancel-button")) {
         const eventId = e.target.dataset.event;
@@ -225,112 +237,29 @@ async function loadPastTrips(userId, container) {
 
       tripCard.innerHTML = `
         <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 ${trip.departure_time}</p>
+<p>📅 תאריך: ${formatDate(trip.event_date)} | 🕒 ${trip.departure_time}</p>
         <p>🚘 נהג: ${trip.driver_name || '---'}</p>
         <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+        <p>🎫 תפקידך: ${trip.is_driver ? "נהג" : "נוסע"}</p>
+        <a href="${trip.is_driver ? "driver-trip-details.html" : "passenger-trip-details.html"}?event_id=${trip.event_id}${!trip.is_driver ? `&driver_user_id=${trip.driver_user_id}` : ""}" 
+   class="action-button review-button"
+   data-event="${trip.event_id}"
+   data-driver="${trip.driver_user_id}"
+   data-isdriver="${trip.is_driver}">
+  ✍️ כתוב ביקורת
+</a>
+
+
       `;
-
-      // כנהג
-      if (trip.is_driver) {
-        tripCard.innerHTML += `
-          <a href="driver-trip-details.html?event_id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
-          <button class="action-button cancel-button driver-cancel-button"
-                  data-event="${trip.event_id}"
-                  data-driver="${userId}">
-            בטל נסיעה
-          </button>
-        `;
-      }
-
-      // כנוסע
-      if (!trip.is_driver && trip.passenger_status) {
-        tripCard.innerHTML += `
-          <a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>
-          <button class="action-button cancel-button"
-                  data-event="${trip.event_id}"
-                  data-driver="${trip.driver_user_id}">
-            בטל הרשמה
-          </button>
-        `;
-      }
 
       container.appendChild(tripCard);
     }
-
-    // טיפול בכפתורי ביטול
-    container.addEventListener("click", async (e) => {
-      if (e.target.classList.contains("cancel-button")) {
-        const eventId = e.target.dataset.event;
-        const driverId = e.target.dataset.driver;
-
-        const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל?");
-        if (!confirmCancel) return;
-
-        const endpoint = e.target.classList.contains("driver-cancel-button")
-          ? "/cancel-trip-by-driver"
-          : "/cancel-ride";
-
-        const body = e.target.classList.contains("driver-cancel-button")
-          ? { event_id: eventId, user_id: userId }
-          : { event_id: eventId, driver_user_id: driverId, passenger_user_id: userId };
-
-        try {
-          const res = await fetch(`${baseUrl}${endpoint}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-
-          const data = await res.json();
-          if (res.ok) {
-            alert(data.message || "עודכן בהצלחה");
-            container.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
-            loadPastTrips(userId, container); // רענון
-          } else {
-            alert(data.message || "שגיאה בביטול");
-          }
-        } catch (err) {
-          console.error("שגיאה:", err);
-          alert("שגיאה בביטול");
-        }
-      }
-    });
 
   } catch (err) {
     console.error("שגיאה בטעינת נסיעות שהסתיימו:", err);
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות שהסתיימו</p>";
   }
 }
-
-
-function submitReview(eventId, reviewerUserId, revieweeUserId, reviewerRole) {
-  const rating = parseInt(prompt("דרג בין 1 ל-5:"));
-  const comment = prompt("הזן תגובה:");
-
-  if (!rating || !comment) return;
-
-  fetch(`${baseUrl}/add-review`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event_id: eventId,
-      reviewer_user_id: reviewerUserId,
-      reviewee_user_id: revieweeUserId,
-      reviewer_role: reviewerRole,
-      rating,
-      comment
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.message || "הביקורת נוספה בהצלחה");
-    })
-    .catch(err => {
-      console.error("שגיאה בשליחת הביקורת:", err);
-      alert("שגיאה בשליחת הביקורת");
-    });
-}
-
 
 function startPaymentProcess(buttonElement, eventId, driverUserId) {
   const passengerUserId = localStorage.getItem("user_id");
