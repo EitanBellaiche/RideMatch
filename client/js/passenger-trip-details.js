@@ -1,3 +1,8 @@
+const params = new URLSearchParams(window.location.search);
+  const eventId = params.get("event_id");
+  const driverUserId = params.get("driver_user_id");
+  const userId = localStorage.getItem("user_id");
+
 function stringToColor(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -10,10 +15,6 @@ function stringToColor(str) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const params = new URLSearchParams(window.location.search);
-  const eventId = params.get("event_id");
-  const driverUserId = params.get("driver_user_id");
-  const userId = localStorage.getItem("user_id");
 
   if (!eventId || !driverUserId || !userId) {
     alert("חסרים פרטים לזיהוי הנסיעה או המשתמש");
@@ -26,13 +27,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     const driver = drivers.find(d => d.driver_user_id == driverUserId);
 
     if (driver) {
-      document.getElementById("ride-title").textContent = `שם הנהג: ${driver.username}`;
-      document.getElementById("ride-date-time").textContent =
-        `🕒 שעת יציאה: ${driver.departure_time}`;
-      document.getElementById("pickup-location").textContent =
-        `📍 מיקום איסוף: ${driver.pickup_location}`;
-      document.getElementById("driver-info").textContent = `🚘 נהג: ${driver.username}`;
-    }
+  document.getElementById("ride-title").textContent = `שם הנהג: ${driver.username}`;
+  document.getElementById("ride-date-time").textContent = `🕒 שעת יציאה: ${driver.departure_time}`;
+  document.getElementById("pickup-location").textContent = `📍 מיקום איסוף: ${driver.pickup_location}`;
+  document.getElementById("driver-info").textContent = `🚘 נהג: ${driver.username}`;
+
+ const tripDate = new Date(driver.event_date); // רק תאריך
+const today = new Date();
+today.setHours(0, 0, 0, 0);         // אפס את השעה של היום
+tripDate.setHours(0, 0, 0, 0);     // אפס את השעה של תאריך הנסיעה
+
+if (tripDate < today) {
+  renderReviewForm();
+}
+
+
+
+}
+
   } catch (err) {
     console.error("שגיאה בטעינת פרטי הנהג:", err);
   }
@@ -100,3 +112,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
+function renderReviewForm() {
+  console.log("📌 נכנסנו לפונקציית renderReviewForm");
+
+  const container = document.getElementById("review-section");
+  container.innerHTML += `
+    <form id="review-form">
+      <label for="rating">דירוג (1 עד 5):</label><br>
+      <input type="number" id="rating" min="1" max="5" required><br><br>
+
+      <label for="comment">הערה (לא חובה):</label><br>
+      <textarea id="comment" rows="3" cols="40"></textarea><br><br>
+
+      <button type="submit">שלח ביקורת</button>
+    </form>
+  `;
+
+  document.getElementById("review-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const rating = parseInt(document.getElementById("rating").value);
+    const comment = document.getElementById("comment").value;
+
+    try {
+      const res = await fetch("/submit-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_id: eventId,
+          reviewer_id: userId,
+          reviewed_user_id: driverUserId,
+          rating,
+          comment
+        })
+      });
+
+      if (res.ok) {
+        container.innerHTML = "<p>✅ הביקורת נשמרה בהצלחה</p>";
+      } else {
+        container.innerHTML = "<p>❌ שגיאה בשמירת הביקורת</p>";
+      }
+    } catch (err) {
+      console.error("שגיאה בשליחת ביקורת:", err);
+      container.innerHTML = "<p>❌ שגיאה כללית</p>";
+    }
+  });
+}
