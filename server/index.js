@@ -522,30 +522,6 @@ app.post('/submit-review', async (req, res) => {
   }
 });
 
-app.get('/completed-trips', async (req, res) => {
-  const { user_id } = req.query;
-  try {
-    const result = await pool.query(`
-      SELECT e.*, ed.departure_time, ed.user_id AS driver_id, 'driver' AS role
-      FROM events e
-      JOIN event_drivers ed ON e.id = ed.event_id
-      WHERE ed.user_id = $1 AND e.event_date < CURRENT_DATE
-
-      UNION
-
-      SELECT e.*, ed.departure_time, ed.user_id AS driver_id, 'passenger' AS role
-      FROM events e
-      JOIN event_passengers ep ON e.id = ep.event_id
-      JOIN event_drivers ed ON ed.event_id = e.id
-      WHERE ep.user_id = $1 AND e.event_date < CURRENT_DATE
-    `, [user_id]);
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Error fetching completed trips:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

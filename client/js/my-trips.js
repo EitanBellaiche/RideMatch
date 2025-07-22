@@ -1,5 +1,3 @@
-const baseUrl = "https://ridematch-a905.onrender.com";
-
 document.addEventListener("DOMContentLoaded", async () => {
   const userId = localStorage.getItem("user_id");
   if (!userId) {
@@ -16,26 +14,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   passengerSection.className = "trip-section passenger-trips";
   passengerSection.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
 
-  const pastSection = document.createElement("section");
-  pastSection.className = "trip-section past-trips";
-  pastSection.innerHTML = "<h2>🕒 נסיעות שהסתיימו</h2>";
-
   document.querySelector("main").appendChild(driverSection);
   document.querySelector("main").appendChild(passengerSection);
-  document.querySelector("main").appendChild(pastSection);
 
-  loadDriverTrips(userId, driverSection, pastSection);
-  loadPassengerTrips(userId, passengerSection, pastSection);
-
+  loadDriverTrips(userId, driverSection);
+  loadPassengerTrips(userId, passengerSection);
 });
 
-function isTripPast(trip) {
-  const tripDateTime = new Date(`${trip.event_date}T${trip.departure_time}`);
-  return tripDateTime < new Date();
-}
+const baseUrl = "https://ridematch-a905.onrender.com";
 
-
-async function loadDriverTrips(userId, upcomingContainer, pastContainer) {
+async function loadDriverTrips(userId, container) {
   try {
     const res = await fetch(`${baseUrl}/driver-trips?user_id=${userId}`);
     if (!res.ok) throw new Error("בעיה בטעינת נסיעות כנהג");
@@ -46,84 +34,69 @@ async function loadDriverTrips(userId, upcomingContainer, pastContainer) {
       return;
     }
 
-    for (const trip of trips) {
-      const past = isTripPast(trip);
+    trips.forEach(trip => {
       const tripCard = document.createElement("article");
       tripCard.classList.add("trip-card");
+      tripCard.innerHTML = `
+    <h3>${trip.title}</h3>
+    <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+    <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+<a href="driver-trip-details.html?event_id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
+    <button class="action-button cancel-button driver-cancel-button"
+            data-event="${trip.event_id}"
+            data-driver="${userId}">
+      בטל נסיעה
+    </button>
+  `;
+      container.appendChild(tripCard);
+    });
 
-      let inner = `
-        <h3>${trip.title}</h3>
-<p>📅 תאריך: ${trip.event_date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
-        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        <a href="driver-trip-details.html?event_id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
-        <button class="action-button cancel-button driver-cancel-button"
-                data-event="${trip.event_id}" data-driver="${userId}">
-          בטל נסיעה
-        </button>
-      `;
+    // האזנה לביטול נסיעה ע"י נהג
+    container.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("driver-cancel-button")) {
+        const eventId = e.target.dataset.event;
+        const driverId = e.target.dataset.driver;
 
-      if (past) {
+        const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל את הנסיעה?");
+        if (!confirmCancel) return;
+
         try {
-          const paxRes = await fetch(`${baseUrl}/approved-passengers?event_id=${trip.event_id}&driver_user_id=${userId}`);
-          const pax = paxRes.ok ? await paxRes.json() : [];
-          if (pax.length > 0) {
-            inner += `<hr/><h4>נוסעים שנסעו:</h4>`;
-            inner += pax.map(p =>
-              `<div>
-                 ${p.username}
-                 <button class="review-button"
-                   data-role="driver"
-                   data-reviewer="${userId}"
-                   data-reviewee="${p.passenger_user_id}"
-                   data-event="${trip.event_id}">
-                   ✍️ דרג
-                 </button>
-               </div>`
-            ).join("");
+          const res = await fetch(`${baseUrl}/cancel-trip-by-driver`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              event_id: eventId,
+              user_id: driverId,
+            })
+            ,
+          });
+
+
+          const data = await res.json();
+          if (res.ok) {
+            alert(data.message || "הנסיעה בוטלה בהצלחה");
+            container.innerHTML = "<h2>🔵 נסיעות כנהג</h2>";
+            loadDriverTrips(driverId, container); // רענון
+          } else {
+            alert(data.message || "שגיאה בביטול");
           }
         } catch (err) {
-          console.warn("שגיאה בקבלת נוסעים:", err);
+          console.error("שגיאה בביטול הנסיעה:", err);
+          alert("שגיאה בביטול הנסיעה");
         }
-      }
-
-      tripCard.innerHTML = inner;
-      (past ? pastContainer : upcomingContainer).appendChild(tripCard);
-
-    }
-
-    container.addEventListener("click", async (e) => {
-      if (!e.target.classList.contains("driver-cancel-button")) return;
-      const eventId = e.target.dataset.event;
-      const driverId = e.target.dataset.driver;
-
-      if (!confirm("האם אתה בטוח שברצונך לבטל את הנסיעה?")) return;
-
-      try {
-        const res = await fetch(`${baseUrl}/cancel-trip-by-driver`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ event_id: eventId, user_id: driverId })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          alert(data.message);
-          container.innerHTML = "<h2>🔵 נסיעות כנהג</h2>";
-          loadDriverTrips(driverId, container);
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        alert("שגיאה בביטול הנסיעה");
       }
     });
 
   } catch (err) {
+    console.error("שגיאה בטעינת נסיעות כנהג:", err);
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנהג</p>";
   }
 }
 
-async function loadPassengerTrips(userId, upcomingContainer, pastContainer) {
 
+async function loadPassengerTrips(userId, container) {
   try {
     const res = await fetch(`${baseUrl}/passenger-trips?user_id=${userId}`);
     if (!res.ok) throw new Error("בעיה בטעינת נסיעות כנוסע");
@@ -138,91 +111,105 @@ async function loadPassengerTrips(userId, upcomingContainer, pastContainer) {
       const tripCard = document.createElement("article");
       tripCard.classList.add("trip-card");
 
-      let status = "";
+      let buttonHTML = "";
       let statusHTML = "";
+      let status = ""
       try {
         const checkRes = await fetch(`${baseUrl}/check-registration?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}&passenger_user_id=${userId}`);
         const checkData = await checkRes.json();
         status = checkData.status;
 
         if (status === "paid") {
-          statusHTML = `<div>✅ אתה רשום לנסיעה</div>`;
+          statusHTML = `<div class="trip-badge badge-paid">✅ אתה רשום לנסיעה</div>`;
         } else if (status === "approved") {
           statusHTML = `
-            <div>💳 אושרת, שלם בבקשה</div>
-            <button class="pay-now-button" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">שלם עכשיו</button>
-          `;
-        } else if (status === "pending") {
-          statusHTML = `<div>⏳ ממתין לאישור נהג</div>`;
+    <div class="trip-badge badge-approved">💳 אושרת, שלם בבקשה</div>
+    <button class="pay-now-button" onclick="startPaymentProcess(this, ${trip.event_id}, ${trip.driver_user_id})">
+      שלם עכשיו
+    </button>
+  `;
         }
+        else if (status === "pending") {
+          statusHTML = `<div class="trip-badge badge-pending">⏳ ממתין לאישור נהג</div>`;
+        }
+
       } catch (e) {
         console.warn("שגיאה בבדיקת סטטוס:", e);
       }
 
-      const past = isTripPast(trip);
-      let reviewButtonHTML = "";
-      if (past && status === "paid") {
-        reviewButtonHTML = `
-          <button class="review-button"
-            data-role="passenger"
-            data-reviewer="${userId}"
-            data-reviewee="${trip.driver_user_id}"
-            data-event="${trip.event_id}">
-            ✍️ דרג את הנהג
-          </button>`;
-      }
+      let detailsButtonHTML = "";
+if (status === "paid") {
+  detailsButtonHTML = `<a href="passenger-trip-details.html?event_id=${trip.event_id}&driver_user_id=${trip.driver_user_id}" class="action-button details-button">צפה בפרטים</a>`;
+}
+
 
       tripCard.innerHTML = `
-        <h3>${trip.title}</h3>
-        <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
-        <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
-        <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
-        ${statusHTML}
-        ${reviewButtonHTML}
-        <button class="action-button cancel-button"
-          data-event="${trip.event_id}" data-driver="${trip.driver_user_id}">
-          בטל הרשמה
-        </button>
-      `;
+  <h3>${trip.title}</h3>
+  <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+  <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
+  <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
+  ${detailsButtonHTML}
+  ${buttonHTML}
+  ${statusHTML}
+  <button class="action-button cancel-button"
+          data-event="${trip.event_id}"
+          data-driver="${trip.driver_user_id}">
+    בטל הרשמה
+  </button>
+`;
 
-      (past ? pastContainer : upcomingContainer).appendChild(tripCard);
+      container.appendChild(tripCard);
     }
 
+    // ביטול הרשמה
     container.addEventListener("click", async (e) => {
-      if (!e.target.classList.contains("cancel-button")) return;
-      const eventId = e.target.dataset.event;
-      const driverId = e.target.dataset.driver;
-      const passengerId = localStorage.getItem("user_id");
+      if (e.target.classList.contains("cancel-button")) {
+        const eventId = e.target.dataset.event;
+        const driverId = e.target.dataset.driver;
+        const passengerId = localStorage.getItem("user_id");
 
-      if (!confirm("לבטל את ההרשמה לנסיעה זו?")) return;
+        const confirmCancel = confirm("האם אתה בטוח שברצונך לבטל את ההרשמה לנסיעה זו?");
+        if (!confirmCancel) return;
 
-      try {
-        const res = await fetch(`${baseUrl}/cancel-ride`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ event_id: eventId, driver_user_id: driverId, passenger_user_id: passengerId })
-        });
+        try {
+          const res = await fetch(`${baseUrl}/cancel-ride`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              event_id: eventId,
+              driver_user_id: driverId,
+              passenger_user_id: passengerId
+            })
+          });
 
-        const data = await res.json();
-        if (res.ok) {
-          alert(data.message);
-          container.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
-          loadPassengerTrips(passengerId, container);
-        } else {
-          alert(data.message || "שגיאה בביטול");
+          const data = await res.json();
+          if (res.ok) {
+            alert(data.message);
+            container.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
+            loadPassengerTrips(passengerId, container);
+          } else {
+            alert(data.message || "שגיאה בביטול");
+          }
+        } catch (err) {
+          console.error("שגיאה בביטול הנסיעה:", err);
+          alert("שגיאה בביטול הנסיעה");
         }
-      } catch (err) {
-        alert("שגיאה בביטול הנסיעה");
       }
     });
 
   } catch (err) {
+    console.error("שגיאה בטעינת נסיעות כנוסע:", err);
     container.innerHTML += "<p style='color:red;'>שגיאה בטעינת נסיעות כנוסע</p>";
   }
 }
 
 function startPaymentProcess(buttonElement, eventId, driverUserId) {
   const passengerUserId = localStorage.getItem("user_id");
+
+  if (!passengerUserId) {
+    alert("עליך להתחבר כדי לשלם.");
+    return;
+  }
 
   buttonElement.disabled = true;
   buttonElement.textContent = "🔄 מעבד תשלום...";
@@ -241,78 +228,20 @@ function startPaymentProcess(buttonElement, eventId, driverUserId) {
         const data = await res.json();
         if (res.ok) {
           buttonElement.textContent = "✅ רשום לנסיעה";
-          buttonElement.disabled = true;
+          buttonElement.classList.remove("pay-button");
+          buttonElement.classList.add("disabled-button");
         } else {
           buttonElement.textContent = "💳 אושרת, שלם בבקשה";
           buttonElement.disabled = false;
-          alert(data.message || "שגיאה בתשלום");
+          alert(data.message || "שגיאה בעיבוד תשלום");
         }
       })
       .catch(err => {
-        console.error("שגיאת רשת:", err);
+        console.error("שגיאה ברשת:", err);
         buttonElement.textContent = "💳 אושרת, שלם בבקשה";
         buttonElement.disabled = false;
+        alert("שגיאת רשת. נסה שוב.");
       });
   }, 2000);
 }
 
-async function loadCompletedTrips(userId, container) {
-  try {
-    const res = await fetch(`${baseUrl}/completed-trips?user_id=${userId}`);
-    const trips = await res.json();
-
-    if (trips.length === 0) {
-      container.innerHTML += "<p>אין נסיעות שהסתיימו.</p>";
-      return;
-    }
-
-    trips.forEach(trip => {
-      const tripCard = document.createElement("div");
-      tripCard.className = "trip-card";
-      tripCard.innerHTML = `
-        <h3>${trip.title}</h3>
-        <p>🗓️ ${trip.event_date} | 🕒 ${trip.departure_time}</p>
-        <p>📍 ${trip.location}</p>
-        <p>סטטוס: נסיעה הסתיימה (${trip.role === 'driver' ? 'נהג' : 'נוסע'})</p>
-        <textarea placeholder="כתוב ביקורת כאן..." rows="3" style="width: 100%; margin-top: 10px;"></textarea>
-        <button class="action-button details-button" style="margin-top: 8px;">שלח ביקורת</button>
-      `;
-      container.appendChild(tripCard);
-    });
-  } catch (err) {
-    console.error("Error loading completed trips:", err);
-  }
-}
-
-// האזנה לכל כפתור דרוג
-document.addEventListener("click", async (e) => {
-  if (!e.target.classList.contains("review-button")) return;
-
-  const eventId = e.target.dataset.event;
-  const reviewer = e.target.dataset.reviewer;
-  const reviewee = e.target.dataset.reviewee;
-  const role = e.target.dataset.role;
-
-  const rating = prompt("דרג מ־1 עד 5:");
-  if (!rating) return;
-  const comment = prompt("כתוב ביקורת:");
-  if (!comment) return;
-
-  try {
-    const res = await fetch(`${baseUrl}/submit-review`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_id: eventId, reviewer_user_id: reviewer, reviewee_user_id: reviewee, reviewer_role: role, rating: parseInt(rating), comment })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert("✅ הביקורת נשמרה");
-      e.target.disabled = true;
-      e.target.textContent = "✔️ נשלח";
-    } else {
-      alert(data.message || "שגיאה בשמירת הביקורת");
-    }
-  } catch (err) {
-    alert("שגיאת רשת בעת שליחת ביקורת");
-  }
-});
