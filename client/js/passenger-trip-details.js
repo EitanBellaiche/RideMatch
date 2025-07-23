@@ -3,16 +3,14 @@ const params = new URLSearchParams(window.location.search);
   const driverUserId = params.get("driver_user_id");
   const userId = localStorage.getItem("user_id");
 
-function stringToColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = "#" + ((hash >> 24) & 0xFF).toString(16).padStart(2, "0") +
-    ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
-    ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
-  return color;
+function idToColor(id) {
+  let hash = parseInt(id);
+  const r = (hash * 123) % 255;
+  const g = (hash * 456) % 255;
+  const b = (hash * 789) % 255;
+  return `rgb(${r}, ${g}, ${b})`;
 }
+
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -75,7 +73,7 @@ const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&dri
         const p = document.createElement("p");
         p.classList.add("chat-message");
         p.classList.add(msg.user_id == userId ? "chat-own" : "chat-other");
-        const color = stringToColor(msg.username);
+        const color = idToColor(msg.user_id);
         p.innerHTML = `<strong style="color:${color}">${msg.username}:</strong> ${msg.content}`;
         chatBox.appendChild(p);
       });

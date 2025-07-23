@@ -2,16 +2,14 @@ const baseUrl = "https://ridematch-a905.onrender.com";
 let isPastTrip = false;
 
 
-function stringToColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = "#" + ((hash >> 24) & 0xFF).toString(16).padStart(2, "0") +
-    ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
-    ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
-  return color;
+function idToColor(id) {
+  let hash = parseInt(id); // ודא שזה מספר
+  const r = (hash * 123) % 255;
+  const g = (hash * 456) % 255;
+  const b = (hash * 789) % 255;
+  return `rgb(${r}, ${g}, ${b})`;
 }
+
 
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = urlParams.get("event_id");
@@ -156,7 +154,7 @@ const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${u
 
     const box = document.getElementById("chat-box");
     box.innerHTML = messages.map(m => {
-      const color = stringToColor(m.username);
+const color = idToColor(m.user_id);
       return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
     }).join("");
   } catch (err) {
