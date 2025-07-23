@@ -440,30 +440,39 @@ app.get('/approved-passengers', async (req, res) => {
   }
 });
 app.get('/get-messages', async (req, res) => {
-  const { event_id, driver_user_id } = req.query;
+  const { event_id, user_id } = req.query;
 
-  if (!event_id || !driver_user_id) {
+  if (!event_id || !user_id) {
     return res.status(400).json({ message: "Missing parameters" });
   }
 
   try {
+    // בדיקה אם המשתמש שייך לנסיעה
+    const checkUser = await pool.query(`
+      SELECT 1
+      FROM event_drivers
+      WHERE event_id = $1 AND user_id = $2
+
+      UNION
+
+      SELECT 1
+      FROM event_passengers
+      WHERE event_id = $1
+        AND passenger_user_id = $2
+        AND (status = 'approved' OR status = 'paid')
+    `, [event_id, user_id]);
+
+    if (checkUser.rowCount === 0) {
+      return res.status(403).json({ message: "אין לך הרשאה לראות את הודעות הצ'אט של נסיעה זו." });
+    }
+
     const result = await pool.query(`
       SELECT cm.*, u.username
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
       WHERE cm.event_id = $1
-        AND (
-          cm.user_id = $2
-          OR EXISTS (
-            SELECT 1 FROM event_passengers ep
-            WHERE ep.event_id = $1
-              AND ep.driver_user_id = $2
-              AND ep.passenger_user_id = cm.user_id
-              AND (ep.status = 'approved' OR ep.status = 'paid')
-          )
-        )
       ORDER BY cm.timestamp ASC
-    `, [event_id, driver_user_id]);
+    `, [event_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -471,6 +480,7 @@ app.get('/get-messages', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 app.post('/send-message', async (req, res) => {
   const { event_id, user_id, content } = req.body;
@@ -480,11 +490,14 @@ app.post('/send-message', async (req, res) => {
   }
 
   try {
+    // בדיקה אם המשתמש שייך לנסיעה הזו (כנהג או נוסע מאושר)
     const userCheck = await pool.query(`
       SELECT 1
-      FROM events
-      WHERE id = $1 AND driver_user_id = $2
+      FROM event_drivers
+      WHERE event_id = $1 AND user_id = $2
+
       UNION
+
       SELECT 1
       FROM event_passengers
       WHERE event_id = $1
@@ -496,6 +509,7 @@ app.post('/send-message', async (req, res) => {
       return res.status(403).json({ message: "אין לך הרשאה לשלוח הודעות בצ'אט של נסיעה זו." });
     }
 
+    // שמירת ההודעה בטבלה
     await pool.query(`
       INSERT INTO chat_messages (event_id, user_id, content)
       VALUES ($1, $2, $3)
@@ -507,6 +521,7 @@ app.post('/send-message', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת בעת שליחת הודעה" });
   }
 });
+
 
 
 app.get('/driver-trip-details', async (req, res) => {
