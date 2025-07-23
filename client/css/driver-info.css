@@ -44,17 +44,27 @@ h1 {
 
 .review {
   background-color: #1E293B;
-  padding: 1.2rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  border: 1px solid #334155;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.review:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
 
 .review p {
   margin: 0.4rem 0;
-  color: #CBD5E1;
   font-size: 0.95rem;
+  line-height: 1.6;
+  color: #CBD5E1;
 }
-
 .review strong {
   color: #FACC15;
+  font-size: 1.05rem;
 }
