@@ -618,6 +618,30 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+app.get('/reviews', async (req, res) => {
+  const { reviewee_user_id } = req.query;
+
+  if (!reviewee_user_id) {
+    return res.status(400).json({ message: "Missing reviewee_user_id" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        rr.rating, rr.comment, rr.reviewer_user_id,
+        u.username AS reviewer_username
+      FROM ride_reviews rr
+      JOIN users u ON rr.reviewer_user_id = u.id
+      WHERE rr.reviewee_user_id = $1
+      ORDER BY rr.submitted_at DESC
+    `, [reviewee_user_id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("שגיאה בקבלת ביקורות:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
