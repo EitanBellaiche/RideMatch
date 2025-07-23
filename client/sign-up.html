@@ -7,11 +7,17 @@
   <link rel="stylesheet" href="css/sign-up.css" />
 </head>
 <body>
-  <main class="login-box">
+  <main class="sign-box">
     <h2>הרשמה</h2>
-    <form id="loginForm">
+    <form id="signForm">
       <input type="text" id="username" placeholder="שם משתמש" required />
       <input type="password" id="password" placeholder="סיסמה" required />
+      <input type="text" id="email" placeholder="אימייל" required />
+      <input type="integer" id="phone_number" placeholder="מספר טלפון" required />
+      <input type="text" id="gender" placeholder="זכר/נקבה" required />
+      <h1>תאריך לידה</h1>
+      <input type="date" id="birth_date" name="birth_date" required>
+
       <button type="submit">לחץ להרשמה</button>
       <p class="message" id="messageArea"></p>
     </form>
