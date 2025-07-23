@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}`);
+const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);
 
     const drivers = await res.json();
     const driver = drivers.find(d => d.driver_user_id == driverUserId);
@@ -64,7 +64,7 @@ if (tripDate < now) {
 
   async function loadMessages() {
     try {
-      const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}`);
+const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);
       const messages = await res.json();
       const chatBox = document.getElementById("chat-box");
 
@@ -102,7 +102,13 @@ if (tripDate < now) {
       await fetch("/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event_id: eventId, user_id: userId, content })
+        body: JSON.stringify({
+  event_id: eventId,
+  user_id: userId,
+  driver_user_id: driverUserId,
+  content
+})
+
       });
 
       input.value = "";
