@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch(`/drivers/${eventId}`);
+    const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}`);
+
     const drivers = await res.json();
     const driver = drivers.find(d => d.driver_user_id == driverUserId);
 
@@ -63,7 +64,7 @@ if (tripDate < now) {
 
   async function loadMessages() {
     try {
-      const res = await fetch(`/get-messages?event_id=${eventId}`);
+      const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}`);
       const messages = await res.json();
       const chatBox = document.getElementById("chat-box");
 
