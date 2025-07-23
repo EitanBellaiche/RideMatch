@@ -140,9 +140,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("שגיאה בקבלת הנוסעים:", err);
   }
 
-  // שלב 4: צ'אט
-  loadMessages(eventId);
-  setInterval(() => loadMessages(eventId), 5000);
+  loadMessages(eventId, driverUserId);
+setInterval(() => loadMessages(eventId, driverUserId), 5000);
+
+async function loadMessages(eventId, driverUserId) {
+  const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&driver_user_id=${driverUserId}`);
+  const messages = await res.json();
+
+  const box = document.getElementById("chat-box");
+  box.innerHTML = messages.map(m => {
+    const color = stringToColor(m.username);
+    return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
+  }).join("");
+}
+
 });
 
 async function approvePassenger(eventId, driverId, passengerId, button) {

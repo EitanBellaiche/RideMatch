@@ -440,10 +440,10 @@ app.get('/approved-passengers', async (req, res) => {
   }
 });
 app.get('/get-messages', async (req, res) => {
-  const { event_id } = req.query;
+  const { event_id, driver_user_id } = req.query;
 
-  if (!event_id) {
-    return res.status(400).json({ message: "Missing event_id" });
+  if (!event_id || !driver_user_id) {
+    return res.status(400).json({ message: "Missing parameters" });
   }
 
   try {
@@ -452,8 +452,18 @@ app.get('/get-messages', async (req, res) => {
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
       WHERE cm.event_id = $1
+        AND (
+          cm.user_id = $2
+          OR EXISTS (
+            SELECT 1 FROM event_passengers ep
+            WHERE ep.event_id = $1
+              AND ep.driver_user_id = $2
+              AND ep.passenger_user_id = cm.user_id
+              AND (ep.status = 'approved' OR ep.status = 'paid')
+          )
+        )
       ORDER BY cm.timestamp ASC
-    `, [event_id]);
+    `, [event_id, driver_user_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -461,6 +471,7 @@ app.get('/get-messages', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 app.post('/send-message', async (req, res) => {
   const { event_id, user_id, content } = req.body;
 
