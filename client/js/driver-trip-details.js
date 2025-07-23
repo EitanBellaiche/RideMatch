@@ -140,19 +140,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("שגיאה בקבלת הנוסעים:", err);
   }
 
-  loadMessages(eventId, driverUserId);
-setInterval(() => loadMessages(eventId, driverUserId), 5000);
+  const userId = localStorage.getItem("user_id");
+  loadMessages(eventId, userId);
 
-async function loadMessages(eventId, driverUserId) {
-  const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&driver_user_id=${driverUserId}`);
-  const messages = await res.json();
+setInterval(() => loadMessages(eventId, userId), 5000);
 
-  const box = document.getElementById("chat-box");
-  box.innerHTML = messages.map(m => {
-    const color = stringToColor(m.username);
-    return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
-  }).join("");
+async function loadMessages(eventId, userId) {
+  try {
+    const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}`);
+    const messages = await res.json();
+
+    // במקרה שיש שגיאה – נבדוק אם messages הוא מערך
+    if (!Array.isArray(messages)) {
+      console.error("התגובה אינה מערך:", messages);
+      return;
+    }
+
+    const box = document.getElementById("chat-box");
+    box.innerHTML = messages.map(m => {
+      const color = stringToColor(m.username);
+      return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
+    }).join("");
+  } catch (err) {
+    console.error("שגיאה בטעינת הודעות:", err);
+  }
 }
+
 
 });
 
@@ -181,22 +194,6 @@ async function approvePassenger(eventId, driverId, passengerId, button) {
   }
 }
 
-async function loadMessages(eventId) {
-  try {
-    const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}`);
-    const messages = await res.json();
-    const box = document.getElementById("chat-box");
-
-    box.innerHTML = messages.map(m => {
-      const color = stringToColor(m.username);
-      return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
-    }).join("");
-  } catch (err) {
-    console.error("שגיאה בטעינת הודעות:", err);
-  }
-}
-
-
 async function sendMessage() {
   const eventId = new URLSearchParams(window.location.search).get("event_id");
   const userId = localStorage.getItem("user_id");
@@ -211,7 +208,7 @@ async function sendMessage() {
     });
 
     document.getElementById("chat-message").value = "";
-    loadMessages(eventId);
+    loadMessages(eventId, userId);
   } catch (err) {
     console.error("שגיאה בשליחת הודעה:", err);
   }
