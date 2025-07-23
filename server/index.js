@@ -694,7 +694,7 @@ app.get("/trip-details", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT ed.*, u.username
-       FROM event_details ed
+       FROM event_drivers ed
        JOIN users u ON ed.user_id = u.id
        WHERE ed.event_id = $1 AND ed.user_id = $2`,
       [event_id, driver_user_id]
