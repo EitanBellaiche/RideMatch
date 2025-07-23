@@ -13,12 +13,11 @@ function stringToColor(str) {
   return color;
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const eventId = urlParams.get("event_id");
+const driverUserId = localStorage.getItem("user_id"); 
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const eventId = urlParams.get("event_id");
-const driverUserId = localStorage.getItem("user_id");
-
   if (!eventId || !driverUserId) {
     document.getElementById("trip-details").innerText = "אירוע לא נמצא.";
     return;
