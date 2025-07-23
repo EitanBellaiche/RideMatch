@@ -10,7 +10,11 @@ body {
     color: white;
   }
   
-  .login-box {
+  h1{
+    font-size: small;
+    
+  }
+  .sign-box {
     background-color: #2563EB;
     padding: 2.5rem;
     border-radius: 15px;
@@ -19,7 +23,7 @@ body {
     width: 320px;
   }
   
-  .login-box h2 {
+  .sign-box h2 {
     margin-bottom: 1rem;
     font-size: 1.8rem;
   }

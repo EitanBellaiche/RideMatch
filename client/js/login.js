@@ -34,3 +34,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     messageArea.style.color = "#F87171";
   }
 });
+
+document.getElementById("goToSignUp").onclick = function() {
+  window.location.href = "sign-up.html";
+};

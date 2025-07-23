@@ -50,6 +50,24 @@ form button:hover {
   background-color: #0891B2;
 }
 
+.main-btn {
+  width: 75%;
+  background-color: #06B6D4;
+  color: white;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.main-btn:hover {
+  background-color: #0891B2;
+}
+
+
 .message {
   margin-top: 1rem;
   color: #FBBF24; /* כתום רך להודעות */
