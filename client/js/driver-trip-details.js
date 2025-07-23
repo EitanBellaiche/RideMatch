@@ -17,7 +17,7 @@ function stringToColor(str) {
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const eventId = urlParams.get("event_id");
-  const driverUserId = localStorage.getItem("user_id");
+const driverUserId = localStorage.getItem("user_id");
 
   if (!eventId || !driverUserId) {
     document.getElementById("trip-details").innerText = "אירוע לא נמצא.";
@@ -147,8 +147,7 @@ setInterval(() => loadMessages(eventId, userId), 5000);
 
 async function loadMessages(eventId, userId) {
   try {
-    const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}`);
-    const messages = await res.json();
+const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);    const messages = await res.json();
 
     // במקרה שיש שגיאה – נבדוק אם messages הוא מערך
     if (!Array.isArray(messages)) {
@@ -202,10 +201,16 @@ async function sendMessage() {
 
   try {
     await fetch(`${baseUrl}/send-message`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_id: eventId, user_id: userId, content })
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    event_id: eventId,
+    user_id: userId,
+    driver_user_id: driverUserId,
+    content
+  })
+});
+
 
     document.getElementById("chat-message").value = "";
     loadMessages(eventId, userId);

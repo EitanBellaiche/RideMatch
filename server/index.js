@@ -440,14 +440,14 @@ app.get('/approved-passengers', async (req, res) => {
   }
 });
 app.get('/get-messages', async (req, res) => {
-  const { event_id, user_id } = req.query;
+  const { event_id, user_id, driver_user_id } = req.query;
 
-  if (!event_id || !user_id) {
+  if (!event_id || !user_id || !driver_user_id) {
     return res.status(400).json({ message: "Missing parameters" });
   }
 
   try {
-    // בדיקה אם המשתמש שייך לנסיעה
+    // בדיקה אם המשתמש חלק מהנסיעה הספציפית
     const checkUser = await pool.query(`
       SELECT 1
       FROM event_drivers
@@ -459,8 +459,9 @@ app.get('/get-messages', async (req, res) => {
       FROM event_passengers
       WHERE event_id = $1
         AND passenger_user_id = $2
+        AND driver_user_id = $3
         AND (status = 'approved' OR status = 'paid')
-    `, [event_id, user_id]);
+    `, [event_id, user_id, driver_user_id]);
 
     if (checkUser.rowCount === 0) {
       return res.status(403).json({ message: "אין לך הרשאה לראות את הודעות הצ'אט של נסיעה זו." });
@@ -470,9 +471,9 @@ app.get('/get-messages', async (req, res) => {
       SELECT cm.*, u.username
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
-      WHERE cm.event_id = $1
+      WHERE cm.event_id = $1 AND cm.driver_user_id = $2
       ORDER BY cm.timestamp ASC
-    `, [event_id]);
+    `, [event_id, driver_user_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -483,14 +484,14 @@ app.get('/get-messages', async (req, res) => {
 
 
 app.post('/send-message', async (req, res) => {
-  const { event_id, user_id, content } = req.body;
+  const { event_id, user_id, content, driver_user_id } = req.body;
 
-  if (!event_id || !user_id || !content) {
+  if (!event_id || !user_id || !content || !driver_user_id) {
     return res.status(400).json({ message: "Missing data" });
   }
 
   try {
-    // בדיקה אם המשתמש שייך לנסיעה הזו (כנהג או נוסע מאושר)
+    // בדיקה אם המשתמש שייך לנסיעה הזו
     const userCheck = await pool.query(`
       SELECT 1
       FROM event_drivers
@@ -502,18 +503,19 @@ app.post('/send-message', async (req, res) => {
       FROM event_passengers
       WHERE event_id = $1
         AND passenger_user_id = $2
+        AND driver_user_id = $3
         AND (status = 'approved' OR status = 'paid')
-    `, [event_id, user_id]);
+    `, [event_id, user_id, driver_user_id]);
 
     if (userCheck.rowCount === 0) {
       return res.status(403).json({ message: "אין לך הרשאה לשלוח הודעות בצ'אט של נסיעה זו." });
     }
 
-    // שמירת ההודעה בטבלה
+    // שמירת ההודעה עם driver_user_id
     await pool.query(`
-      INSERT INTO chat_messages (event_id, user_id, content)
-      VALUES ($1, $2, $3)
-    `, [event_id, user_id, content]);
+      INSERT INTO chat_messages (event_id, user_id, content, driver_user_id)
+      VALUES ($1, $2, $3, $4)
+    `, [event_id, user_id, content, driver_user_id]);
 
     res.status(200).json({ message: "הודעה נשלחה בהצלחה" });
   } catch (err) {
@@ -521,7 +523,6 @@ app.post('/send-message', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת בעת שליחת הודעה" });
   }
 });
-
 
 
 app.get('/driver-trip-details', async (req, res) => {
