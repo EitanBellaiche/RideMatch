@@ -476,20 +476,38 @@ app.post('/send-message', async (req, res) => {
   const { event_id, user_id, content } = req.body;
 
   if (!event_id || !user_id || !content) {
-    return res.status(400).json({ message: "Missing fields" });
+    return res.status(400).json({ message: "Missing data" });
   }
 
   try {
-    await pool.query(
-      `INSERT INTO chat_messages (event_id, user_id, content) VALUES ($1, $2, $3)`,
-      [event_id, user_id, content]
-    );
-    res.status(200).json({ message: "Message sent" });
+    const userCheck = await pool.query(`
+      SELECT 1
+      FROM events
+      WHERE id = $1 AND driver_user_id = $2
+      UNION
+      SELECT 1
+      FROM event_passengers
+      WHERE event_id = $1
+        AND passenger_user_id = $2
+        AND (status = 'approved' OR status = 'paid')
+    `, [event_id, user_id]);
+
+    if (userCheck.rowCount === 0) {
+      return res.status(403).json({ message: "אין לך הרשאה לשלוח הודעות בצ'אט של נסיעה זו." });
+    }
+
+    await pool.query(`
+      INSERT INTO chat_messages (event_id, user_id, content)
+      VALUES ($1, $2, $3)
+    `, [event_id, user_id, content]);
+
+    res.status(200).json({ message: "הודעה נשלחה בהצלחה" });
   } catch (err) {
     console.error("שגיאה בשליחת הודעה:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "שגיאה בשרת בעת שליחת הודעה" });
   }
 });
+
 
 app.get('/driver-trip-details', async (req, res) => {
   const { event_id, driver_user_id } = req.query;
