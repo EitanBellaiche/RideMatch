@@ -1,5 +1,5 @@
 const baseUrl = "https://ridematch-a905.onrender.com";
-let isPastTrip = false;  
+let isPastTrip = false;
 
 
 function stringToColor(str) {
@@ -8,8 +8,8 @@ function stringToColor(str) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
   const color = "#" + ((hash >> 24) & 0xFF).toString(16).padStart(2, "0") +
-                      ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
-                      ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
+    ((hash >> 16) & 0xFF).toString(16).padStart(2, "0") +
+    ((hash >> 8) & 0xFF).toString(16).padStart(2, "0");
   return color;
 }
 
@@ -24,35 +24,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  
-try {
-  const res = await fetch(`${baseUrl}/driver-trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
-  const trip = await res.json();
-  const tripDate = new Date(trip.event_date);
-const now = new Date();
-isPastTrip = tripDate < now;
+
+  try {
+    const res = await fetch(`${baseUrl}/driver-trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
+    const trip = await res.json();
+    const tripDate = new Date(trip.event_date);
+    const now = new Date();
+    isPastTrip = tripDate < now;
 
 
-  if (!trip || !trip.title) {
-    document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
-    return;
-  }
+    if (!trip || !trip.title) {
+      document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
+      return;
+    }
 
-  document.getElementById("trip-details").innerHTML = `
+    document.getElementById("trip-details").innerHTML = `
     <div class="trip-card">
       <h3>${trip.title}</h3>
       <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
       <p>📍 ${trip.pickup_location}</p>
     </div>
   `;
-} catch (err) {
-  console.error("שגיאה בקבלת פרטי הנסיעה:", err);
-}
+  } catch (err) {
+    console.error("שגיאה בקבלת פרטי הנסיעה:", err);
+  }
 
 
   // שלב 2: נוסעים מאושרים
   try {
-const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${eventId}&driver_user_id=${driverUserId}`);
+    const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${eventId}&driver_user_id=${driverUserId}`);
     const approved = await approvedRes.json();
     const container = document.getElementById("approved-passengers");
 
@@ -60,10 +60,10 @@ const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${event
       container.innerHTML = "<p>אין נוסעים מאושרים עדיין.</p>";
     } else {
       approved.forEach(p => {
-  const div = document.createElement("div");
-  div.className = "trip-card";
+        const div = document.createElement("div");
+        div.className = "trip-card";
 
-  div.innerHTML = `
+        div.innerHTML = `
     <p><strong>👤 ${p.username}</strong></p>
     ${isPastTrip ? `
       <label>⭐ דירוג:
@@ -84,8 +84,8 @@ const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${event
     ` : ''}
   `;
 
-  container.appendChild(div);
-});
+        container.appendChild(div);
+      });
 
     }
   } catch (err) {
@@ -101,18 +101,40 @@ const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${event
     if (!passengers.length) {
       requestsContainer.innerHTML = "<p>אין בקשות להצטרפות כרגע.</p>";
     } else {
-      passengers.forEach(passenger => {
+      passengers.forEach(async (passenger) => {
         const div = document.createElement("div");
         div.className = "trip-card";
+
+        // קבלת ביקורות לנוסע
+        let reviewsHtml = "<p>אין ביקורות זמינות</p>";
+        try {
+          const res = await fetch(`${baseUrl}/reviews?reviewee_user_id=${passenger.passenger_user_id}`);
+          const reviews = await res.json();
+
+          if (reviews.length > 0) {
+            reviewsHtml = reviews.map(r => `
+        <div class="review-box">
+          <strong>${r.reviewer_username}</strong> דירג: ⭐ ${r.rating}
+          <p>${r.comment || ''}</p>
+        </div>
+      `).join('');
+          }
+        } catch (err) {
+          console.error("שגיאה בקבלת ביקורות לנוסע:", err);
+        }
+
         div.innerHTML = `
-          <p><strong>שם:</strong> ${passenger.username}</p>
-          <p><strong>סטטוס:</strong> ${passenger.status}</p>
-          <button onclick="approvePassenger(${eventId}, ${driverUserId}, ${passenger.passenger_user_id}, this)">
-            אשר הצטרפות
-          </button>
-        `;
+    <p><strong>שם:</strong> ${passenger.username}</p>
+    <p><strong>סטטוס:</strong> ${passenger.status}</p>
+    <div><strong>ביקורות:</strong><br>${reviewsHtml}</div>
+    <button onclick="approvePassenger(${eventId}, ${driverUserId}, ${passenger.passenger_user_id}, this)">
+      אשר הצטרפות
+    </button>
+  `;
+
         requestsContainer.appendChild(div);
       });
+
     }
   } catch (err) {
     console.error("שגיאה בקבלת הנוסעים:", err);
@@ -153,7 +175,7 @@ async function loadMessages(eventId) {
     const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}`);
     const messages = await res.json();
     const box = document.getElementById("chat-box");
-    
+
     box.innerHTML = messages.map(m => {
       const color = stringToColor(m.username);
       return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
