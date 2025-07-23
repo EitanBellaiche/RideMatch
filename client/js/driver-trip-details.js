@@ -146,7 +146,6 @@ async function loadMessages(eventId, userId) {
   try {
 const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);    const messages = await res.json();
 
-    // במקרה שיש שגיאה – נבדוק אם messages הוא מערך
     if (!Array.isArray(messages)) {
       console.error("התגובה אינה מערך:", messages);
       return;

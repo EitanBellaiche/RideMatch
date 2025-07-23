@@ -20,32 +20,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);
+  const res = await fetch(`/trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
+  const trip = await res.json();
 
-    const drivers = await res.json();
-    const driver = drivers.find(d => d.driver_user_id == driverUserId);
+  if (trip.username) {
+    document.getElementById("ride-title").textContent = `שם הנהג: ${trip.username}`;
+    document.getElementById("ride-date-time").textContent = `🕒 שעת יציאה: ${trip.departure_time}`;
+    document.getElementById("pickup-location").textContent = `📍 מיקום איסוף: ${trip.pickup_location}`;
+    document.getElementById("driver-info").textContent = `🚘 נהג: ${trip.username}, רכב: ${trip.car_model} (${trip.car_color})`;
 
-    if (driver) {
-  document.getElementById("ride-title").textContent = `שם הנהג: ${driver.username}`;
-  document.getElementById("ride-date-time").textContent = `🕒 שעת יציאה: ${driver.departure_time}`;
-  document.getElementById("pickup-location").textContent = `📍 מיקום איסוף: ${driver.pickup_location}`;
-  document.getElementById("driver-info").textContent = `🚘 נהג: ${driver.username}`;
-
- const tripDate = new Date(driver.event_date); // רק תאריך
-const today = new Date();
-const now = new Date();
-if (tripDate < now) {
-  renderReviewForm();
-}
-
-
-
-
-}
-
-  } catch (err) {
-    console.error("שגיאה בטעינת פרטי הנהג:", err);
+    const tripDate = new Date(trip.event_date);
+    const now = new Date();
+    if (tripDate < now) {
+      renderReviewForm();
+    }
   }
+} catch (err) {
+  console.error("שגיאה בטעינת פרטי הנסיעה:", err);
+}
+
 
   try {
     const res = await fetch(`/approved-passengers?event_id=${eventId}&driver_user_id=${driverUserId}`);
