@@ -585,6 +585,39 @@ app.post('/submit-review', async (req, res) => {
 });
 
 
+app.post('/signup', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: "יש למלא שם משתמש וסיסמה" });
+  }
+
+  try {
+    
+    const userExists = await pool.query(
+      'SELECT * FROM users WHERE username = $1',
+      [username]
+    );
+    if (userExists.rows.length > 0) {
+      return res.status(409).json({ message: "שם המשתמש כבר תפוס" });
+    }
+
+    
+    const result = await pool.query(
+      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
+      [username, password]
+    );
+
+    res.status(201).json({
+      message: "נרשמת בהצלחה!",
+      user_id: result.rows[0].id
+    });
+  } catch (err) {
+    console.error("שגיאה בהרשמה:", err);
+    res.status(500).json({ message: "שגיאה בשרת בהרשמה" });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
