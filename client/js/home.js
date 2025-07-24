@@ -46,6 +46,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkPendingRequestsOnHome();
   checkPassengerApprovalStatusOnHome();
 });
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
 function renderEvents(events) {
   const eventsGrid = document.querySelector(".events-grid");
@@ -60,10 +67,13 @@ function renderEvents(events) {
     const article = document.createElement("article");
     article.classList.add("event-card");
 
+    // עיצוב תאריך ל-DD/MM/YYYY (אופציונלי)
+    const formattedDate = formatDate(event.event_date);
+
     article.innerHTML = `
       <header class="event-info">
         <h3>${event.title}</h3>
-        <p>📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
+        <p>📅 ${formattedDate} | 📍 ${event.location} | 🕒 ${event.day} ${event.time}</p>
       </header>
       <a href="event-details.html?id=${event.id}" class="details-button" data-event='${JSON.stringify(event)}'>צפה בפרטים</a>
     `;
