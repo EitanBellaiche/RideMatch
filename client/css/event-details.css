@@ -338,3 +338,30 @@ body {
 .secondary-button:hover {
   background-color: #475569;
 }
+
+.mobile-home-button {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-home-button {
+    display: inline-block;
+    margin-right: auto;
+    margin-left: 1rem;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+
+  
+
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
