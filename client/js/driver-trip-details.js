@@ -217,6 +217,7 @@ async function sendMessage() {
 async function submitReview(eventId, reviewerId, revieweeId, reviewerRole) {
   const rating = document.getElementById(`rating-${revieweeId}`).value;
   const comment = document.getElementById(`comment-${revieweeId}`).value;
+  const button = document.querySelector(`button[onclick*="submitReview(${eventId}, ${reviewerId}, ${revieweeId}`); // הכפתור הרלוונטי
 
   try {
     const res = await fetch(`${baseUrl}/submit-review`, {
@@ -232,14 +233,31 @@ async function submitReview(eventId, reviewerId, revieweeId, reviewerRole) {
       })
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
+    }
+
     if (res.ok) {
-      alert("הביקורת נשלחה בהצלחה!");
+      alert("✅ הביקורת נשלחה בהצלחה!");
+      if (button) {
+        button.outerHTML = `<p style="color: green; font-weight: bold;">✔️ ביקורת נשלחה</p>`;
+      }
     } else {
-      alert(data.message || "שגיאה בשליחת ביקורת");
+      if (data.message?.includes("כבר שלחת ביקורת")) {
+        if (button) {
+          button.outerHTML = `<p style="color: red; font-weight: bold;">🔒 כבר נתת ביקורת לנוסע זה</p>`;
+        }
+      } else {
+        alert(`❌ ${data.message || "שגיאה בשליחת ביקורת"}`);
+      }
     }
   } catch (err) {
     console.error("שגיאה בשליחת ביקורת:", err);
-    alert("שגיאה בעת שליחת הביקורת");
+    alert("❌ שגיאת רשת בעת שליחת הביקורת");
   }
 }
+

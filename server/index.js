@@ -114,7 +114,7 @@ app.get('/drivers/:eventId', async (req, res) => {
 
   try {
     const driversResult = await pool.query(
-  `SELECT 
+      `SELECT 
      u.id AS driver_user_id,
      u.username, 
      ed.departure_time, 
@@ -128,8 +128,8 @@ app.get('/drivers/:eventId', async (req, res) => {
    JOIN event_drivers ed ON u.id = ed.user_id
    JOIN events e ON ed.event_id = e.id
    WHERE ed.event_id = $1`,
-  [eventId]
-);
+      [eventId]
+    );
 
 
     res.status(200).json(driversResult.rows);
@@ -642,7 +642,7 @@ app.post('/signup', async (req, res) => {
   }
 
   try {
-    
+
     const userExists = await pool.query(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -651,7 +651,7 @@ app.post('/signup', async (req, res) => {
       return res.status(409).json({ message: "שם המשתמש כבר תפוס" });
     }
 
-    
+
     const result = await pool.query(
       'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
       [username, password]
@@ -697,10 +697,12 @@ app.get("/trip-details", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT ed.*, u.username
-       FROM event_drivers ed
-       JOIN users u ON ed.user_id = u.id
-       WHERE ed.event_id = $1 AND ed.user_id = $2`,
+      `SELECT ed.*, u.username, e.event_date
+FROM event_drivers ed
+JOIN users u ON ed.user_id = u.id
+JOIN events e ON ed.event_id = e.id
+WHERE ed.event_id = $1 AND ed.user_id = $2
+`,
       [event_id, driver_user_id]
     );
 
