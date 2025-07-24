@@ -48,10 +48,14 @@ app.post('/login', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM events');
+    const result = await pool.query(`
+      SELECT * FROM events
+      WHERE event_date >= CURRENT_DATE
+      ORDER BY event_date ASC, time ASC
+    `);
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching events:', error);
+    console.error('Error fetching future events:', error);
     res.status(500).json({ message: "Server error while fetching events" });
   }
 });

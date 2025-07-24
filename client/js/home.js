@@ -47,7 +47,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkPassengerApprovalStatusOnHome();
 });
 
-// ✅ הצגת אירועים
 function renderEvents(events) {
   const eventsGrid = document.querySelector(".events-grid");
   eventsGrid.innerHTML = "";
@@ -72,6 +71,7 @@ function renderEvents(events) {
     eventsGrid.appendChild(article);
   });
 }
+
 
 // ✅ התראה על בקשות ממתינות כל 3 שניות
 function checkPendingRequestsOnHome() {
