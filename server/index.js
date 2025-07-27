@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, '..', 'client')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'login.html'));
@@ -586,14 +585,14 @@ app.post('/submit-review', async (req, res) => {
 
 
 app.post('/signup', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email, phone_number, gender, birth_date } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "יש למלא שם משתמש וסיסמה" });
+  if (!username || !password || !email || !phone_number || !gender || !birth_date) {
+    return res.status(400).json({ message: "יש למלא את כל השדות" });
   }
 
   try {
-    
+    // בדוק אם המשתמש כבר קיים
     const userExists = await pool.query(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -602,10 +601,13 @@ app.post('/signup', async (req, res) => {
       return res.status(409).json({ message: "שם המשתמש כבר תפוס" });
     }
 
-    
+    // הכנס משתמש חדש
     const result = await pool.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
-      [username, password]
+      `INSERT INTO users 
+      (username, password, email, phone_number, gender, birth_date) 
+      VALUES ($1, $2, $3, $4, $5, $6) 
+      RETURNING id`,
+      [username, password, email, phone_number, gender, birth_date]
     );
 
     res.status(201).json({
@@ -617,6 +619,25 @@ app.post('/signup', async (req, res) => {
     res.status(500).json({ message: "שגיאה בשרת בהרשמה" });
   }
 });
+
+app.get('/user/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const result = await pool.query(
+      'SELECT username, email, phone_number, gender, birth_date FROM users WHERE id = $1',
+      [userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.use(express.static(path.join(__dirname, '..', 'client')));
+
 
 
 app.listen(PORT, () => {

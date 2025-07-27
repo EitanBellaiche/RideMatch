@@ -19,7 +19,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       messageArea.style.color = "#22C55E";
       localStorage.setItem("username", username);
       localStorage.setItem("user_id", data.user_id);
-
+      
 
       
       setTimeout(() => {
