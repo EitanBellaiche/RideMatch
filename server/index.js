@@ -577,15 +577,15 @@ app.get('/driver-trip-details', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-  e.title,
-  e.day AS date,
-  e.event_date,
-  ed.departure_time,
-  ed.pickup_location
-FROM events e
-JOIN event_drivers ed ON e.id = ed.event_id
-WHERE e.id = $1 AND ed.user_id = $2
-
+        e.title,
+        e.day AS date,
+        e.event_date,
+        e.location, -- 
+        ed.departure_time,
+        ed.pickup_location
+      FROM events e
+      JOIN event_drivers ed ON e.id = ed.event_id
+      WHERE e.id = $1 AND ed.user_id = $2
     `, [event_id, driver_user_id]);
 
     if (result.rows.length === 0) {

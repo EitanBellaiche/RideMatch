@@ -13,7 +13,7 @@ function idToColor(id) {
 
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = urlParams.get("event_id");
-const driverUserId = localStorage.getItem("user_id"); 
+const driverUserId = localStorage.getItem("user_id");
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!eventId || !driverUserId) {
@@ -29,6 +29,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const now = new Date();
     isPastTrip = tripDate < now;
 
+    try {
+      const pickupRes = await fetch(`${baseUrl}/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
+      const pickupData = await pickupRes.json();
+      if (pickupData.link) {
+        document.getElementById("pickup-nav").href = pickupData.link;
+      } else {
+        document.getElementById("pickup-nav").textContent = "⚠️";
+      }
+
+      const destRes = await fetch(`${baseUrl}/api/navigation-link?address=${encodeURIComponent(trip.location)}`);
+      const destData = await destRes.json();
+      if (destData.link) {
+        document.getElementById("destination-nav").href = destData.link;
+      } else {
+        document.getElementById("destination-nav").textContent = "⚠️";
+      }
+    } catch (err) {
+      console.error("❌ שגיאה בהבאת קישורי ניווט:", err);
+    }
 
     if (!trip || !trip.title) {
       document.getElementById("trip-details").innerHTML = "<p>אירוע לא נמצא.</p>";
@@ -36,18 +55,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     document.getElementById("trip-details").innerHTML = `
-    <div class="trip-card">
-      <h3>${trip.title}</h3>
-      <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
-      <p>📍 ${trip.pickup_location}</p>
-    </div>
-  `;
+  <div class="trip-card">
+    <h3>${trip.title}</h3>
+    <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
+    <p>📍 ${trip.pickup_location}</p>
+    <a id="pickup-nav" class="nav-link" target="_blank">🔽 נווט לנקודת האיסוף</a><br>
+    <a id="destination-nav" class="nav-link" target="_blank">🔼 נווט ליעד</a>
+  </div>
+`;
+
   } catch (err) {
     console.error("שגיאה בקבלת פרטי הנסיעה:", err);
   }
 
 
-  // שלב 2: נוסעים מאושרים
   try {
     const approvedRes = await fetch(`${baseUrl}/approved-passengers?event_id=${eventId}&driver_user_id=${driverUserId}`);
     const approved = await approvedRes.json();
@@ -89,7 +110,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("שגיאה בטעינת נוסעים מאושרים:", err);
   }
 
-  // שלב 3: בקשות להצטרפות
   try {
     const res = await fetch(`${baseUrl}/driver-requests?event_id=${eventId}&driver_user_id=${driverUserId}`);
     const passengers = await res.json();
@@ -102,7 +122,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const div = document.createElement("div");
         div.className = "trip-card";
 
-        // קבלת ביקורות לנוסע
         let reviewsHtml = "<p>אין ביקורות זמינות</p>";
         try {
           const res = await fetch(`${baseUrl}/reviews?reviewee_user_id=${passenger.passenger_user_id}`);
@@ -140,26 +159,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userId = localStorage.getItem("user_id");
   loadMessages(eventId, userId);
 
-setInterval(() => loadMessages(eventId, userId), 5000);
+  setInterval(() => loadMessages(eventId, userId), 5000);
 
-async function loadMessages(eventId, userId) {
-  try {
-const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);    const messages = await res.json();
+  async function loadMessages(eventId, userId) {
+    try {
+      const res = await fetch(`${baseUrl}/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`); const messages = await res.json();
 
-    if (!Array.isArray(messages)) {
-      console.error("התגובה אינה מערך:", messages);
-      return;
+      if (!Array.isArray(messages)) {
+        console.error("התגובה אינה מערך:", messages);
+        return;
+      }
+
+      const box = document.getElementById("chat-box");
+      box.innerHTML = messages.map(m => {
+        const color = idToColor(m.user_id);
+        return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
+      }).join("");
+    } catch (err) {
+      console.error("שגיאה בטעינת הודעות:", err);
     }
-
-    const box = document.getElementById("chat-box");
-    box.innerHTML = messages.map(m => {
-const color = idToColor(m.user_id);
-      return `<p><strong style="color: ${color}">${m.username}:</strong> ${m.content}</p>`;
-    }).join("");
-  } catch (err) {
-    console.error("שגיאה בטעינת הודעות:", err);
   }
-}
 
 
 });
@@ -197,15 +216,15 @@ async function sendMessage() {
 
   try {
     await fetch(`${baseUrl}/send-message`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    event_id: eventId,
-    user_id: userId,
-    driver_user_id: driverUserId,
-    content
-  })
-});
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: eventId,
+        user_id: userId,
+        driver_user_id: driverUserId,
+        content
+      })
+    });
 
 
     document.getElementById("chat-message").value = "";

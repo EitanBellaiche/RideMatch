@@ -125,3 +125,18 @@ button:hover {
   color: #E2E8F0;
   border-right: 4px solid #60A5FA;
 }
+.nav-link {
+  display: inline-block;
+  background-color: #10B981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  margin: 0.5rem 0;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #059669;
+}
