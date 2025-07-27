@@ -492,6 +492,7 @@ app.get('/driver-trip-details', async (req, res) => {
   e.title,
   e.day AS date,
   e.event_date,
+  e.location,
   ed.departure_time,
   ed.pickup_location
 FROM events e
@@ -633,6 +634,35 @@ app.get('/user/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+// בקובץ index.js של השרת
+app.delete('/events/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // כדאי למחוק גם קשורים (למשל event_drivers/event_passengers)
+    await pool.query('DELETE FROM events WHERE id = $1', [id]);
+    res.json({ message: "האירוע נמחק בהצלחה" });
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה במחיקת אירוע" });
+  }
+});
+
+// --- מחיקת משתמש ---
+app.delete('/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    // מחיקת כל התלויות
+    await pool.query('DELETE FROM event_drivers WHERE user_id = $1', [userId]);
+    await pool.query('DELETE FROM event_passengers WHERE driver_user_id = $1 OR passenger_user_id = $1', [userId]);
+    await pool.query('DELETE FROM ride_reviews WHERE reviewee_user_id = $1 OR reviewer_user_id = $1', [userId]);
+    // מחיקת המשתמש
+    await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+    res.json({ message: "המשתמש נמחק בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה במחיקת משתמש:", err);
+    res.status(500).json({ message: "שגיאה במחיקת משתמש" });
   }
 });
 
