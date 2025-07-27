@@ -3,46 +3,8 @@ const cors = require('cors');
 const path = require('path');
 const pool = require('./db');
 
-require('dotenv').config(); 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const axios = require('axios');
-
-app.get("/api/navigation-link", async (req, res) => {
-  const address = req.query.address;
-  if (!address) return res.status(400).json({ error: "כתובת חסרה" });
-
-  console.log("📥 בקשת ניווט לכתובת:", address);
-
-  const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`;
-
-  try {
-    const geoRes = await fetch(nominatimUrl, {
-      headers: {
-        "User-Agent": "RideMatch App"
-      }
-    });
-    const data = await geoRes.json();
-
-    if (!data || data.length === 0) {
-      console.warn("⚠️ לא נמצאה כתובת");
-      return res.json({ error: "לא נמצאה כתובת" });
-    }
-
-    const { lat, lon } = data[0];
-    const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
-    console.log("✅ קישור ניווט:", gmapsUrl);
-
-    res.json({ link: gmapsUrl });
-  } catch (err) {
-    console.error("❌ שגיאה בתהליך הניווט:", err);
-    res.status(500).json({ error: "שגיאה בשרת" });
-  }
-});
-
-
 
 app.use(cors());
 app.use(express.json());
@@ -85,14 +47,10 @@ app.post('/login', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT * FROM events
-      WHERE event_date >= CURRENT_DATE
-      ORDER BY event_date ASC, time ASC
-    `);
+    const result = await pool.query('SELECT * FROM events');
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching future events:', error);
+    console.error('Error fetching events:', error);
     res.status(500).json({ message: "Server error while fetching events" });
   }
 });
@@ -151,7 +109,7 @@ app.get('/drivers/:eventId', async (req, res) => {
 
   try {
     const driversResult = await pool.query(
-      `SELECT 
+  `SELECT 
      u.id AS driver_user_id,
      u.username, 
      ed.departure_time, 
@@ -165,8 +123,8 @@ app.get('/drivers/:eventId', async (req, res) => {
    JOIN event_drivers ed ON u.id = ed.user_id
    JOIN events e ON ed.event_id = e.id
    WHERE ed.event_id = $1`,
-      [eventId]
-    );
+  [eventId]
+);
 
 
     res.status(200).json(driversResult.rows);
@@ -481,40 +439,20 @@ app.get('/approved-passengers', async (req, res) => {
   }
 });
 app.get('/get-messages', async (req, res) => {
-  const { event_id, user_id, driver_user_id } = req.query;
+  const { event_id } = req.query;
 
-  if (!event_id || !user_id || !driver_user_id) {
-    return res.status(400).json({ message: "Missing parameters" });
+  if (!event_id) {
+    return res.status(400).json({ message: "Missing event_id" });
   }
 
   try {
-    // בדיקה אם המשתמש חלק מהנסיעה הספציפית
-    const checkUser = await pool.query(`
-      SELECT 1
-      FROM event_drivers
-      WHERE event_id = $1 AND user_id = $2
-
-      UNION
-
-      SELECT 1
-      FROM event_passengers
-      WHERE event_id = $1
-        AND passenger_user_id = $2
-        AND driver_user_id = $3
-        AND (status = 'approved' OR status = 'paid')
-    `, [event_id, user_id, driver_user_id]);
-
-    if (checkUser.rowCount === 0) {
-      return res.status(403).json({ message: "אין לך הרשאה לראות את הודעות הצ'אט של נסיעה זו." });
-    }
-
     const result = await pool.query(`
       SELECT cm.*, u.username
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
-      WHERE cm.event_id = $1 AND cm.driver_user_id = $2
+      WHERE cm.event_id = $1
       ORDER BY cm.timestamp ASC
-    `, [event_id, driver_user_id]);
+    `, [event_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -522,49 +460,24 @@ app.get('/get-messages', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 app.post('/send-message', async (req, res) => {
-  const { event_id, user_id, content, driver_user_id } = req.body;
+  const { event_id, user_id, content } = req.body;
 
-  if (!event_id || !user_id || !content || !driver_user_id) {
-    return res.status(400).json({ message: "Missing data" });
+  if (!event_id || !user_id || !content) {
+    return res.status(400).json({ message: "Missing fields" });
   }
 
   try {
-    // בדיקה אם המשתמש שייך לנסיעה הזו
-    const userCheck = await pool.query(`
-      SELECT 1
-      FROM event_drivers
-      WHERE event_id = $1 AND user_id = $2
-
-      UNION
-
-      SELECT 1
-      FROM event_passengers
-      WHERE event_id = $1
-        AND passenger_user_id = $2
-        AND driver_user_id = $3
-        AND (status = 'approved' OR status = 'paid')
-    `, [event_id, user_id, driver_user_id]);
-
-    if (userCheck.rowCount === 0) {
-      return res.status(403).json({ message: "אין לך הרשאה לשלוח הודעות בצ'אט של נסיעה זו." });
-    }
-
-    // שמירת ההודעה עם driver_user_id
-    await pool.query(`
-      INSERT INTO chat_messages (event_id, user_id, content, driver_user_id)
-      VALUES ($1, $2, $3, $4)
-    `, [event_id, user_id, content, driver_user_id]);
-
-    res.status(200).json({ message: "הודעה נשלחה בהצלחה" });
+    await pool.query(
+      `INSERT INTO chat_messages (event_id, user_id, content) VALUES ($1, $2, $3)`,
+      [event_id, user_id, content]
+    );
+    res.status(200).json({ message: "Message sent" });
   } catch (err) {
     console.error("שגיאה בשליחת הודעה:", err);
-    res.status(500).json({ message: "שגיאה בשרת בעת שליחת הודעה" });
+    res.status(500).json({ message: "Server error" });
   }
 });
-
 
 app.get('/driver-trip-details', async (req, res) => {
   const { event_id, driver_user_id } = req.query;
@@ -576,15 +489,15 @@ app.get('/driver-trip-details', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-        e.title,
-        e.day AS date,
-        e.event_date,
-        e.location, -- 
-        ed.departure_time,
-        ed.pickup_location
-      FROM events e
-      JOIN event_drivers ed ON e.id = ed.event_id
-      WHERE e.id = $1 AND ed.user_id = $2
+  e.title,
+  e.day AS date,
+  e.event_date,
+  ed.departure_time,
+  ed.pickup_location
+FROM events e
+JOIN event_drivers ed ON e.id = ed.event_id
+WHERE e.id = $1 AND ed.user_id = $2
+
     `, [event_id, driver_user_id]);
 
     if (result.rows.length === 0) {
@@ -679,11 +592,7 @@ app.post('/signup', async (req, res) => {
   }
 
   try {
-upload-sign-up
     // בדוק אם המשתמש כבר קיים
-
-
-master
     const userExists = await pool.query(
       'SELECT * FROM users WHERE username = $1',
       [username]
@@ -692,9 +601,7 @@ master
       return res.status(409).json({ message: "שם המשתמש כבר תפוס" });
     }
 
-upload-sign-up
     // הכנס משתמש חדש
-master
     const result = await pool.query(
       `INSERT INTO users 
       (username, password, email, phone_number, gender, birth_date) 
@@ -713,7 +620,6 @@ master
   }
 });
 
-upload-sign-up
 app.get('/user/:id', async (req, res) => {
   const userId = req.params.id;
   try {
@@ -732,57 +638,6 @@ app.get('/user/:id', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
-
-
-app.get('/reviews', async (req, res) => {
-  const { reviewee_user_id } = req.query;
-
-  if (!reviewee_user_id) {
-    return res.status(400).json({ message: "Missing reviewee_user_id" });
-  }
-
-  try {
-    const result = await pool.query(`
-      SELECT 
-        rr.rating, rr.comment, rr.reviewer_user_id,
-        u.username AS reviewer_username
-      FROM ride_reviews rr
-      JOIN users u ON rr.reviewer_user_id = u.id
-      WHERE rr.reviewee_user_id = $1
-      ORDER BY rr.submitted_at DESC
-    `, [reviewee_user_id]);
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("שגיאה בקבלת ביקורות:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-app.get("/trip-details", async (req, res) => {
-  const { event_id, driver_user_id } = req.query;
-
-  try {
-    const result = await pool.query(
-      `SELECT ed.*, u.username, e.event_date
-FROM event_drivers ed
-JOIN users u ON ed.user_id = u.id
-JOIN events e ON ed.event_id = e.id
-WHERE ed.event_id = $1 AND ed.user_id = $2
-`,
-      [event_id, driver_user_id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "האירוע לא נמצא" });
-    }
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error("שגיאה בשליפת פרטי נסיעה:", err);
-    res.status(500).json({ error: "שגיאת שרת" });
-  }
-master
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
