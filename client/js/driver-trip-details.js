@@ -10,7 +10,6 @@ function idToColor(id) {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = urlParams.get("event_id");
 const driverUserId = localStorage.getItem("user_id");
@@ -28,7 +27,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tripDate = new Date(trip.event_date);
     const now = new Date();
     isPastTrip = tripDate < now;
-
+     
+    document.getElementById("trip-details").innerHTML = `
+  <div class="trip-card">
+    <h3>${trip.title}</h3>
+    <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
+    <p>📍 ${trip.pickup_location}</p>
+    <a id="pickup-nav" class="nav-link" target="_blank">🔽 נווט לנקודת האיסוף</a><br>
+    <a id="destination-nav" class="nav-link" target="_blank">🔼 נווט ליעד</a>
+  </div>
+`;
     try {
       const pickupRes = await fetch(`${baseUrl}/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
       const pickupData = await pickupRes.json();
@@ -54,15 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    document.getElementById("trip-details").innerHTML = `
-  <div class="trip-card">
-    <h3>${trip.title}</h3>
-    <p>📅 ${trip.date} ⏰ ${trip.departure_time}</p>
-    <p>📍 ${trip.pickup_location}</p>
-    <a id="pickup-nav" class="nav-link" target="_blank">🔽 נווט לנקודת האיסוף</a><br>
-    <a id="destination-nav" class="nav-link" target="_blank">🔼 נווט ליעד</a>
-  </div>
-`;
 
   } catch (err) {
     console.error("שגיאה בקבלת פרטי הנסיעה:", err);
