@@ -42,7 +42,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // 🟢 הפעלת בדיקת התראות לנהג
   checkPendingRequestsOnHome();
   checkPassengerApprovalStatusOnHome();
 });
@@ -67,7 +66,6 @@ function renderEvents(events) {
     const article = document.createElement("article");
     article.classList.add("event-card");
 
-    // עיצוב תאריך ל-DD/MM/YYYY (אופציונלי)
     const formattedDate = formatDate(event.event_date);
 
     article.innerHTML = `
@@ -83,7 +81,6 @@ function renderEvents(events) {
 }
 
 
-// ✅ התראה על בקשות ממתינות כל 3 שניות
 function checkPendingRequestsOnHome() {
   const userId = localStorage.getItem("user_id");
   if (!userId) return;
@@ -114,7 +111,6 @@ function checkPendingRequestsOnHome() {
   }, 3000); // כל 3 שניות
 }
 
-// ✅ יצירת התראה במסך
 function showHomeAlert(username) {
   if (document.querySelector(".new-request-alert")) return;
 

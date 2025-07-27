@@ -200,7 +200,7 @@ app.get('/driver-trips', async (req, res) => {
       SELECT 
         e.id as event_id, 
         e.title, 
-        e.day AS date, 
+        e.event_date,           -- ✅ הוסף שדה זה מהטבלה events
         ed.departure_time, 
         ed.pickup_location
       FROM event_drivers ed
@@ -224,7 +224,7 @@ app.get('/passenger-trips', async (req, res) => {
       SELECT 
         e.id AS event_id,
         e.title,
-        e.day AS date,
+        e.event_date,           -- ✅ הוסף גם כאן
         ed.departure_time,
         ed.pickup_location,
         u.username AS driver_name,

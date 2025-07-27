@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadPassengerTrips(userId, passengerSection);
   loadPastTrips(userId, pastSection);
 
-  // האזנה לכל כפתורי הביקורת מכל הקטע
   document.querySelector("main").addEventListener("click", (e) => {
     handleReviewClick(e, userId);
   });
@@ -34,12 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 const baseUrl = "https://ridematch-a905.onrender.com";
 
-function formatDate(isoString) {
-  const date = new Date(isoString);
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
   const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // ינואר זה 0
+  const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+  return `${day}/${month}/${year}`;
 }
 
 async function loadDriverTrips(userId, container) {
@@ -58,7 +57,7 @@ async function loadDriverTrips(userId, container) {
       tripCard.classList.add("trip-card");
       tripCard.innerHTML = `
     <h3>${trip.title}</h3>
-    <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+<p>📅 תאריך: ${formatDate(trip.event_date)} | 🕒 שעת יציאה: ${trip.departure_time}</p>
     <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
 <a href="driver-trip-details.html?event_id=${trip.event_id}" class="action-button details-button">צפה בפרטים</a>
     <button class="action-button cancel-button driver-cancel-button"
@@ -163,7 +162,7 @@ async function loadPassengerTrips(userId, container) {
 
       tripCard.innerHTML = `
   <h3>${trip.title}</h3>
-  <p>📅 תאריך: ${trip.date} | 🕒 שעת יציאה: ${trip.departure_time}</p>
+<p>📅 תאריך: ${formatDate(trip.event_date)} | 🕒 שעת יציאה: ${trip.departure_time}</p>
   <p>🚘 נהג: ${trip.driver_name || 'לא ידוע'}</p>
   <p>📍 מקום איסוף: ${trip.pickup_location || '---'}</p>
   ${detailsButtonHTML}
