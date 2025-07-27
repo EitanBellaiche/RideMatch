@@ -35,19 +35,22 @@ navLink.textContent = "🔗 פתח ניווט בגוגל מפות";
 navLink.target = "_blank";
 document.getElementById("pickup-location").after(navLink);
 
+try {
+  console.log("📦 שולח בקשת ניווט לשרת עם כתובת:", trip.pickup_location);
+  const res = await fetch(`https://ridematch-a905.onrender.com/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
+  const data = await res.json();
+  console.log("📨 תגובת שרת ניווט:", data);
 
-      try {
-const res = await fetch(`https://ridematch-a905.onrender.com/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
-        const data = await res.json();
-        if (data.link) {
-          navLink.href = data.link;
-        } else {
-          navLink.textContent = "⚠️ לא ניתן לפתוח ניווט";
-        }
-      } catch (err) {
-        console.error("שגיאה בקבלת קישור ניווט:", err);
-        navLink.textContent = "⚠️ שגיאה בשרת";
-      }
+  if (data.link) {
+    navLink.href = data.link;
+  } else {
+    navLink.textContent = "⚠️ לא ניתן לפתוח ניווט (אין לינק)";
+  }
+} catch (err) {
+  console.error("❌ שגיאה בקבלת קישור ניווט:", err);
+  navLink.textContent = "⚠️ שגיאה בשרת";
+}
+
 
       const tripDate = new Date(trip.event_date);
       const now = new Date();

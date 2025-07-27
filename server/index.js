@@ -12,31 +12,40 @@ const axios = require('axios');
 
 app.get('/api/navigation-link', async (req, res) => {
   const { address } = req.query;
+  console.log("📥 התקבלה בקשה לניווט עם כתובת:", address);
 
   if (!address) {
+    console.warn("⚠️ לא התקבלה כתובת ב־query");
     return res.status(400).json({ message: "חסר address ב־query" });
   }
 
   try {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    console.log("🔑 מפתח Google Maps:", apiKey ? "נמצא" : "חסר!");
+
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+    console.log("🌍 שולח בקשת Geocoding ל:", geocodeUrl);
 
     const response = await axios.get(geocodeUrl);
-    const result = response.data.results[0];
+    console.log("📨 תגובת Geocode:", response.data);
 
+    const result = response.data.results[0];
     if (!result) {
+      console.warn("⚠️ לא נמצאה כתובת בתוצאה של Google Maps");
       return res.status(404).json({ message: "לא נמצאה כתובת" });
     }
 
     const { lat, lng } = result.geometry.location;
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    console.log("✅ נבנה קישור ניווט:", mapsUrl);
 
     res.json({ link: mapsUrl });
   } catch (err) {
-    console.error("שגיאה ב-Google Maps:", err.message);
+    console.error("❌ שגיאה ב־Google Maps API:", err.message);
     res.status(500).json({ message: "שגיאה בשרת או ב־Google API" });
   }
 });
+
 
 app.use(cors());
 app.use(express.json());
