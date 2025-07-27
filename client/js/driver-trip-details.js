@@ -278,4 +278,3 @@ async function submitReview(eventId, reviewerId, revieweeId, reviewerRole) {
     alert("❌ שגיאת רשת בעת שליחת הביקורת");
   }
 }
-
