@@ -174,27 +174,54 @@ main {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
+  main {
+    padding: 1rem;
+  }
+
+  .trip-card {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .trip-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .trip-card p {
+    font-size: 0.9rem;
+  }
+
+  .action-button,
+  .pay-now-button,
+  .review-button,
+  .cancel-button {
+    min-width: 100%;
+    margin: 8px 0 0 0;
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .trip-section h2 {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .trip-badge {
+    position: static;
+    display: block;
+    margin: 0.5rem 0;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .mobile-back-button {
     display: inline-block;
-    margin-right: auto;
-    margin-left: 1rem;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 1rem;
-  }
-
-  .mobile-back-button:hover {
-    background-color: #0891B2;
-  }
-
-  .main-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    width: 100%;
+    text-align: center;
+    margin: 0.5rem 0;
   }
 }
+
