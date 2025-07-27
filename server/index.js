@@ -492,6 +492,7 @@ app.get('/driver-trip-details', async (req, res) => {
   e.title,
   e.day AS date,
   e.event_date,
+  e.location,
   ed.departure_time,
   ed.pickup_location
 FROM events e
