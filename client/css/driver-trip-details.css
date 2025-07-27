@@ -127,7 +127,7 @@ button:hover {
 }
 .nav-link {
   display: inline-block;
-  background-color: #10B981;
+  background-color: #3B82F6;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -138,5 +138,5 @@ button:hover {
 }
 
 .nav-link:hover {
-  background-color: #059669;
+  background-color: #2563EB;
 }
