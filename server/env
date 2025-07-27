@@ -1,0 +1,5 @@
+DB_USER=ride_match_db_user
+DB_PASSWORD=2QWoxeLIvKX31YiP3VDixhS45E8Wn52J
+DB_HOST=dpg-d1epshffte5s73cdfei0-a.frankfurt-postgres.render.com
+DB_PORT=5432
+DB_NAME=ride_match_db

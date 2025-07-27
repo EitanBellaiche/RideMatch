@@ -206,3 +206,18 @@ ul#passengers-list li {
 #review-form button:hover {
   background-color: #16A34A;
 }
+#navigate-button {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 10px 16px;
+  background-color: #3B82F6;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+#navigate-button:hover {
+  background-color: #2563EB;
+}

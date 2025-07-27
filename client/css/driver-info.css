@@ -1,0 +1,100 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+  direction: rtl;
+}
+
+main.driver-info-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  color: #FACC15;
+  margin-bottom: 2rem;
+}
+
+#driver-details {
+  background-color: #1E293B;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  margin-bottom: 2rem;
+}
+
+#driver-details p {
+  margin: 0.5rem 0;
+  color: #CBD5E1;
+  font-size: 1rem;
+}
+
+#driver-details strong {
+  color: #E2E8F0;
+}
+
+#driver-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.review {
+  background-color: #1E293B;
+  padding: 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  border: 1px solid #334155;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+
+.review p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #CBD5E1;
+}
+.review strong {
+  color: #FACC15;
+  font-size: 1.05rem;
+}
+/* כפתור חזרה – מוסתר במסך רגיל */
+.mobile-back-button {
+  display: none;
+}
+
+/* הצגה במסך קטן בלבד */
+@media (max-width: 768px) {
+  .mobile-back-button {
+    display: inline-block;
+    margin-right: auto;
+    margin-left: 1rem;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1rem;
+  }
+
+  .mobile-back-button:hover {
+    background-color: #0891B2;
+  }
+
+  .main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}

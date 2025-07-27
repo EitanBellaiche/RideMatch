@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
           <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
           <div class="driver-actions">
-            <button class="primary-button" onclick="sendMessageToDriver('${driver.username}')">💬 שליחת הודעה</button>
+          <a class="primary-button" href="driver-info.html?user_id=${driver.driver_user_id}">ℹ️ למידע על הנהג</a>
             ${buttonHTML}
           </div>
         `;
