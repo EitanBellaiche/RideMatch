@@ -649,6 +649,15 @@ app.delete('/events/:id', async (req, res) => {
   }
 });
 
+app.get('/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, username, email, phone_number FROM users');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה בטעינת משתמשים" });
+  }
+});
+
 // --- מחיקת משתמש ---
 app.delete('/users/:id', async (req, res) => {
   const userId = req.params.id;
