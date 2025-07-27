@@ -37,7 +37,7 @@ document.getElementById("pickup-location").after(navLink);
 
 
       try {
-        const res = await fetch(`/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
+const res = await fetch(`https://ridematch-a905.onrender.com/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
         const data = await res.json();
         if (data.link) {
           navLink.href = data.link;
