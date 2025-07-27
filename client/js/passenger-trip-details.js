@@ -1,7 +1,7 @@
 const params = new URLSearchParams(window.location.search);
-  const eventId = params.get("event_id");
-  const driverUserId = params.get("driver_user_id");
-  const userId = localStorage.getItem("user_id");
+const eventId = params.get("event_id");
+const driverUserId = params.get("driver_user_id");
+const userId = localStorage.getItem("user_id");
 
 function idToColor(id) {
   let hash = parseInt(id);
@@ -20,24 +20,44 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-  const res = await fetch(`/trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
-  const trip = await res.json();
+    const res = await fetch(`/trip-details?event_id=${eventId}&driver_user_id=${driverUserId}`);
+    const trip = await res.json();
 
-  if (trip.username) {
-    document.getElementById("ride-title").textContent = `שם הנהג: ${trip.username}`;
-    document.getElementById("ride-date-time").textContent = `🕒 שעת יציאה: ${trip.departure_time}`;
-    document.getElementById("pickup-location").textContent = `📍 מיקום איסוף: ${trip.pickup_location}`;
-    document.getElementById("driver-info").textContent = `🚘 נהג: ${trip.username}, רכב: ${trip.car_model} (${trip.car_color})`;
+    if (trip.username) {
+      document.getElementById("ride-title").textContent = `שם הנהג: ${trip.username}`;
+      document.getElementById("ride-date-time").textContent = `🕒 שעת יציאה: ${trip.departure_time}`;
+      document.getElementById("pickup-location").textContent = `📍 מיקום איסוף: ${trip.pickup_location}`;
+      document.getElementById("driver-info").textContent = `🚘 נהג: ${trip.username}, רכב: ${trip.car_model} (${trip.car_color})`;
 
-    const tripDate = new Date(trip.event_date);
-    const now = new Date();
-    if (tripDate < now) {
-      renderReviewForm();
+      const navLink = document.createElement("a");
+navLink.id = "navigate-button";
+navLink.textContent = "🔗 פתח ניווט בגוגל מפות";
+navLink.target = "_blank";
+document.getElementById("pickup-location").after(navLink);
+
+
+      try {
+        const res = await fetch(`/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
+        const data = await res.json();
+        if (data.link) {
+          navLink.href = data.link;
+        } else {
+          navLink.textContent = "⚠️ לא ניתן לפתוח ניווט";
+        }
+      } catch (err) {
+        console.error("שגיאה בקבלת קישור ניווט:", err);
+        navLink.textContent = "⚠️ שגיאה בשרת";
+      }
+
+      const tripDate = new Date(trip.event_date);
+      const now = new Date();
+      if (tripDate < now) {
+        renderReviewForm();
+      }
     }
+  } catch (err) {
+    console.error("שגיאה בטעינת פרטי הנסיעה:", err);
   }
-} catch (err) {
-  console.error("שגיאה בטעינת פרטי הנסיעה:", err);
-}
 
 
   try {
@@ -55,7 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function loadMessages() {
     try {
-const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);
+      const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&driver_user_id=${driverUserId}`);
       const messages = await res.json();
       const chatBox = document.getElementById("chat-box");
 
@@ -94,11 +114,11 @@ const res = await fetch(`/get-messages?event_id=${eventId}&user_id=${userId}&dri
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  event_id: eventId,
-  user_id: userId,
-  driver_user_id: driverUserId,
-  content
-})
+          event_id: eventId,
+          user_id: userId,
+          driver_user_id: driverUserId,
+          content
+        })
 
       });
 
