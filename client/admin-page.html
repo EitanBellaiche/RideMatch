@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <title>דף ניהול</title>
+  <link rel="stylesheet" href="css/admin-page.css">
+</head>
+<body>
+  <main class="admin-container">
+    <h2>דף ניהול</h2>
+    <section class="tabs">
+      <button id="tab-events">אירועים</button>
+      <button id="tab-users">משתמשים</button>
+    </section>
+
+    <section id="section-events">
+      <button id="addEventBtn"> + הוסף אירוע</button>
+      <section id="eventFormContainer" style="display:none"></section>
+      <table id="eventsTable"></table>
+    </section>
+
+    <section class="search-container">
+        <input type="text" placeholder="חפש אירועים לפי שם או מיקום..." aria-label="חיפוש אירועים" />
+      </section>
+
+    <section id="section-users" style="display:none;">
+      <!-- <button id="addUserBtn">הוסף משתמש</button> -->
+      <section id="userFormContainer" style="display:none"></section>
+      <table id="usersTable"></table>
+    </section>
+
+    <section id="msg"></section>
+  </main>
+  <script src="js/admin.js"></script>
+</body>
+</html>

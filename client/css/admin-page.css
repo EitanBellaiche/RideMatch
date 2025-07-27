@@ -1,0 +1,136 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0F172A;
+    margin: 0;
+    padding: 0;
+    direction: rtl;
+  }
+  
+  .admin-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #1E293B;
+    border-radius: 18px;
+    padding: 32px;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #FACC15;
+    
+  }
+  
+  .tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .tabs button {
+    background: #d9e3ea;
+    border: none;
+    color: #333;
+    padding: 10px 40px;
+    margin: 0 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 18px 18px 0 0;
+    outline: none;
+    transition: background 0.2s;
+  }
+  .tabs button.active,
+  .tabs button:hover {
+    background: #06B6D4;
+    color: #fff;
+  }
+  
+  #addEventBtn {
+    background: #FACC15;
+    color: #fff;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: background 0.2s;
+  }
+  
+  .search-container {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .search-container input {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    background-color: #1E293B;
+    color: white;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.1);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f4f7fa;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1em;
+  }
+  th, td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+  }
+  th {
+    background: #e2e8f0;
+    color: #333;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #94a3b8;
+    color: #fff;
+    cursor: pointer;
+    margin: 0 2px;
+    font-size: 1em;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #64748b;
+  }
+  form input, form select {
+    padding: 8px;
+    margin: 4px 0;
+    border: 1px solid #bdbdbd;
+    border-radius: 6px;
+    font-size: 1em;
+    width: 90%;
+    box-sizing: border-box;
+    text-align: right;
+  }
+  form button {
+    background: #22c55e;
+    color: #fff;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+  #msg {
+    text-align: center;
+    font-size: 1.1em;
+    min-height: 32px;
+    color: #256029;
+    font-weight: bold;
+    margin-top: 12px;
+  }
+  
