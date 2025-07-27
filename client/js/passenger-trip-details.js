@@ -37,8 +37,8 @@ document.getElementById("pickup-location").after(navLink);
 
 try {
   console.log("📦 שולח בקשת ניווט לשרת עם כתובת:", trip.pickup_location);
-  const res = await fetch(`https://ridematch-a905.onrender.com/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
-  const data = await res.json();
+  const navRes = await fetch(`/api/navigation-link?address=${encodeURIComponent(trip.pickup_location)}`);
+  const data = await navRes.json();
   console.log("📨 תגובת שרת ניווט:", data);
 
   if (data.link) {
