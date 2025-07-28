@@ -239,14 +239,18 @@ function checkPassengerApprovalStatusOnHome() {
 }
 
 function showPassengerAlert(eventTitle) {
-  if (document.querySelector(".approved-passenger-alert")) return;
-
-  const alert = document.createElement("div");
-  alert.className = "new-request-alert approved-passenger-alert";
-  alert.innerHTML = `✅ אושרת לנסיעה: <strong>${eventTitle}</strong> — תוכל כעת לשלם`;
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 6000);
+  Swal.fire({
+    icon: 'success',
+    title: 'אושרת לנסיעה!',
+    html: `✅ אושרת לנסיעה: <strong>${eventTitle}</strong><br>תוכל כעת לשלם.`,
+    confirmButtonText: 'מעבר לנסיעות שלי',
+    cancelButtonText: 'סגור',
+    showCancelButton: true,
+    confirmButtonColor: '#10B981', // ירוק
+    cancelButtonColor: '#6B7280'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = 'my-trips.html';
+    }
+  });
 }
