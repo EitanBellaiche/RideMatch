@@ -740,6 +740,73 @@ app.get("/api/navigation-link", async (req, res) => {
 });
 
 
+// עדכון פרטי משתמש
+app.put('/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  const { username, email, phone_number } = req.body;
+  try {
+    await pool.query(
+      'UPDATE users SET username = $1, email = $2, phone_number = $3 WHERE id = $4',
+      [username, email, phone_number, userId]
+    );
+    res.json({ message: "המשתמש עודכן בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בעדכון משתמש:", err);
+    res.status(500).json({ message: "שגיאה בעדכון משתמש" });
+  }
+});
+
+app.put('/events/:id', async (req, res) => {
+  const eventId = req.params.id;
+  const { title, type, event_date, time, location } = req.body;
+  try {
+    await pool.query(
+      `UPDATE events
+       SET title = $1, type = $2, event_date = $3, time = $4, location = $5
+       WHERE id = $6`,
+      [title, type, event_date, time, location, eventId]
+    );
+    res.json({ message: "האירוע עודכן בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בעדכון אירוע:", err);
+    res.status(500).json({ message: "שגיאה בעדכון אירוע" });
+  }
+});
+
+app.get('/events/:id', async (req, res) => {
+  const eventId = req.params.id;
+  try {
+    const result = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "אירוע לא נמצא" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה בשליפת אירוע" });
+  }
+});
+app.post('/events', async (req, res) => {
+  const { title, type, event_date, time, location } = req.body;
+  if (!title || !type || !event_date) {
+    return res.status(400).json({ message: "יש למלא את כל השדות החיוניים" });
+  }
+
+  // חשב את היום מהתאריך
+  const date = new Date(event_date);
+  const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+  const day = days[date.getDay()];
+
+  try {
+    await pool.query(
+      `INSERT INTO events (title, type, event_date, time, location, day)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [title, type, event_date, time, location, day]
+    );
+    res.status(201).json({ message: "האירוע נוסף בהצלחה!" });
+  } catch (err) {
+    res.status(500).json({ message: "שגיאה בהוספת אירוע" });
+  }
+});
 
 
 
