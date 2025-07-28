@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         driversListContainer.appendChild(driverCard);
 
-        // בדוק אם המשתמש המחובר הוא הנהג
         if (parseInt(currentUserId) === parseInt(driver.driver_user_id)) {
           checkPendingJoinRequests(event.id, driver.driver_user_id);
           checkPassengerApprovalStatusOnHome();
@@ -174,7 +173,6 @@ function startPaymentProcess(buttonElement, eventId, driverUserId) {
   }, 2000);
 }
 
-// 🔁 התראות לנהג על בקשות הצטרפות
 function checkPendingJoinRequests(eventId, driverUserId) {
   const notified = new Set();
 
@@ -196,17 +194,24 @@ function checkPendingJoinRequests(eventId, driverUserId) {
 }
 
 function showDriverAlert(username) {
-  const alert = document.createElement("div");
-  alert.className = "new-request-alert";
-  alert.innerHTML = `🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך!`;
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 8000);
+  Swal.fire({
+    icon: 'info',
+    title: 'בקשה חדשה לנסיעה',
+    html: `🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך.`,
+    confirmButtonText: 'צפייה בנסיעות שלי',
+    cancelButtonText: 'סגור',
+    showCancelButton: true,
+    confirmButtonColor: '#2563EB',
+    cancelButtonColor: '#6B7280'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = 'my-trips.html';
+    }
+  });
 }
 
-// 🟢 התראה לנוסע שאושרה בקשתו
+
+
 function checkPassengerApprovalStatusOnHome() {
   const userId = localStorage.getItem("user_id");
   if (!userId) return;
