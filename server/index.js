@@ -739,7 +739,21 @@ app.get("/api/navigation-link", async (req, res) => {
 });
 
 
-
+// עדכון פרטי משתמש
+app.put('/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  const { username, email, phone_number } = req.body;
+  try {
+    await pool.query(
+      'UPDATE users SET username = $1, email = $2, phone_number = $3 WHERE id = $4',
+      [username, email, phone_number, userId]
+    );
+    res.json({ message: "המשתמש עודכן בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בעדכון משתמש:", err);
+    res.status(500).json({ message: "שגיאה בעדכון משתמש" });
+  }
+});
 
 
 

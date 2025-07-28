@@ -1,5 +1,3 @@
-// public/js/admin.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const tabEvents = document.getElementById("tab-events");
     const tabUsers = document.getElementById("tab-users");
@@ -10,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const msg = document.getElementById("msg");
     const searchInput = document.querySelector(".search-container input");
 
-    // --- פונקציית הצגת הודעה עם ניהול זמן --- 
+    // הודעה זמנית
     function showMsg(text, color = "#333", timeout = 3000) {
         msg.textContent = text;
         msg.style.color = color;
@@ -22,11 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, timeout);
         }
     }
-
-    // ברירת מחדל - הצג אירועים
-    sectionEvents.style.display = "";
-    sectionUsers.style.display = "none";
-    tabEvents.classList.add("active");
 
     // מעבר בין טאבים
     tabEvents.onclick = () => {
@@ -44,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadUsers();
     };
 
-    // טעינת אירועים (עם תמיכה בחיפוש)
+    // --- טעינת אירועים ---
     async function loadEvents(filter = "") {
         eventsTable.innerHTML = "<tr><th>מס' אירוע</th><th>כותרת</th><th>סוג</th><th>תאריך</th><th>שעה</th><th>מיקום</th><th>פעולות</th></tr>";
         try {
@@ -81,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // טעינת משתמשים
+    // --- טעינת משתמשים ---
     async function loadUsers() {
         usersTable.innerHTML = "<tr><th>מס' משתמש</th><th>שם</th><th>אימייל</th><th>טלפון</th><th>פעולות</th></tr>";
         try {
@@ -107,14 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             usersTable.innerHTML += `<tr><td colspan="5">שגיאה בטעינת משתמשים</td></tr>`;
         }
-    }
-
-    // חיפוש בזמן אמת
-    if (searchInput) {
-        searchInput.addEventListener("input", (e) => {
-            const filter = e.target.value.trim();
-            loadEvents(filter);
-        });
     }
 
     // --- מחיקת אירוע ---
@@ -145,9 +130,78 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- עריכה (בשלב זה פופ־אפ/alert, בעתיד טופס) ---
+    // --- עריכת משתמש: טופס inline בטבלה ---
+    window.editUser = async (id) => {
+        // סגור טופס אחר אם יש
+        const oldForm = document.getElementById("user-edit-form");
+        if (oldForm) oldForm.remove();
+    
+        // שלוף פרטי משתמש
+        let user;
+        try {
+            const res = await fetch(`/user/${id}`);
+            user = await res.json();
+            if (user.message) {
+                showMsg("משתמש לא נמצא", "#F87171");
+                return;
+            }
+        } catch {
+            showMsg("שגיאה בשליפת משתמש", "#F87171");
+            return;
+        }
+    
+        // מצא את השורה בטבלה להצמדת הטופס
+        const row = [...usersTable.rows].find(r => r.cells[0] && Number(r.cells[0].textContent) === Number(id));
+        if (!row) return;
+    
+        // צור טופס עריכה
+        const form = document.createElement("tr");
+        form.id = "user-edit-form";
+        form.innerHTML = `
+            <td colspan="5">
+                <form id="editUserForm" style="display:flex;gap:1em;align-items:center">
+                    <input name="username" value="${user.username || ""}" required placeholder="שם משתמש" />
+                    <input name="email" value="${user.email || ""}" placeholder="אימייל" />
+                    <input name="phone_number" value="${user.phone_number || ""}" placeholder="טלפון" />
+                    <button type="submit">שמור</button>
+                    <button type="button" id="cancelEditUser">ביטול</button>
+                </form>
+            </td>
+        `;
+        row.parentNode.insertBefore(form, row.nextSibling);
+    
+        // האזנה לטופס
+        form.querySelector("form").onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = Object.fromEntries(new FormData(e.target));
+            try {
+                const res = await fetch(`/users/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+                const data = await res.json();
+                showMsg(data.message || "המשתמש עודכן", "#22C55E");
+                form.remove();       // הסר את הטופס מה-DOM
+                loadUsers();         // רענן את הטבלה
+            } catch {
+                showMsg("שגיאה בעדכון משתמש", "#F87171");
+            }
+        };
+    
+        form.querySelector("#cancelEditUser").onclick = () => form.remove();
+    };
+    
+    // --- עריכת אירוע (אפשר להרחיב) ---
     window.editEvent = (id) => { alert(`עריכת אירוע ${id} - להטמיע טופס עריכה בעתיד.`); };
-    window.editUser = (id) => { alert(`עריכת משתמש ${id} - להטמיע טופס עריכה בעתיד.`); };
+
+    // --- חיפוש בזמן אמת ---
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            const filter = e.target.value.trim();
+            loadEvents(filter);
+        });
+    }
 
     // ברירת מחדל - טען אירועים
     loadEvents();
