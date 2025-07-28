@@ -15,17 +15,22 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      messageArea.textContent = data.message;
-      messageArea.style.color = "#22C55E";
-      localStorage.setItem("username", username);
-      localStorage.setItem("user_id", data.user_id);
-      
+  messageArea.textContent = data.message;
+  messageArea.style.color = "#22C55E";
 
-      
-      setTimeout(() => {
-        window.location.href = "home.html";
-      }, 1000);
+  localStorage.setItem("username", username);
+  localStorage.setItem("user_id", data.user_id);
+  localStorage.setItem("role", data.role); // ← שמור גם את התפקיד
+
+  setTimeout(() => {
+    if (data.role === "admin") {
+      window.location.href = "admin-page.html";
     } else {
+      window.location.href = "home.html";
+    }
+  }, 1000);
+}
+ else {
       messageArea.textContent = data.message;
       messageArea.style.color = "#F87171";
     }
