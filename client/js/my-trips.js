@@ -287,6 +287,7 @@ function startPaymentProcess(buttonElement, eventId, driverUserId) {
           buttonElement.textContent = "✅ רשום לנסיעה";
           buttonElement.classList.remove("pay-button");
           buttonElement.classList.add("disabled-button");
+          location.reload();
         } else {
           buttonElement.textContent = "💳 אושרת, שלם בבקשה";
           buttonElement.disabled = false;
