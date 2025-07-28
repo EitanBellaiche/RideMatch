@@ -444,10 +444,10 @@ app.get('/approved-passengers', async (req, res) => {
   }
 });
 app.get('/get-messages', async (req, res) => {
-  const { event_id } = req.query;
+  const { event_id, driver_user_id } = req.query;
 
-  if (!event_id) {
-    return res.status(400).json({ message: "Missing event_id" });
+  if (!event_id || !driver_user_id) {
+    return res.status(400).json({ message: "Missing event_id or driver_user_id" });
   }
 
   try {
@@ -455,9 +455,9 @@ app.get('/get-messages', async (req, res) => {
       SELECT cm.*, u.username
       FROM chat_messages cm
       JOIN users u ON cm.user_id = u.id
-      WHERE cm.event_id = $1
+      WHERE cm.event_id = $1 AND cm.driver_user_id = $2
       ORDER BY cm.timestamp ASC
-    `, [event_id]);
+    `, [event_id, driver_user_id]);
 
     res.json(result.rows);
   } catch (err) {
@@ -465,17 +465,18 @@ app.get('/get-messages', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-app.post('/send-message', async (req, res) => {
-  const { event_id, user_id, content } = req.body;
 
-  if (!event_id || !user_id || !content) {
+app.post('/send-message', async (req, res) => {
+  const { event_id, user_id, driver_user_id, content } = req.body;
+
+  if (!event_id || !user_id || !driver_user_id || !content) {
     return res.status(400).json({ message: "Missing fields" });
   }
 
   try {
     await pool.query(
-      `INSERT INTO chat_messages (event_id, user_id, content) VALUES ($1, $2, $3)`,
-      [event_id, user_id, content]
+      `INSERT INTO chat_messages (event_id, driver_user_id, user_id, content) VALUES ($1, $2, $3, $4)`,
+      [event_id, driver_user_id, user_id, content]
     );
     res.status(200).json({ message: "Message sent" });
   } catch (err) {
