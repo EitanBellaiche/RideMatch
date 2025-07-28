@@ -112,19 +112,22 @@ function checkPendingRequestsOnHome() {
 }
 
 function showHomeAlert(username) {
-  if (document.querySelector(".new-request-alert")) return;
-
-  const alert = document.createElement("div");
-  alert.className = "new-request-alert";
-  alert.innerHTML = `
-    🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך!
-  `;
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 6000); // נעלם אחרי 6 שניות
+  Swal.fire({
+    icon: 'info',
+    title: 'בקשה חדשה לנסיעה',
+    html: `🚨 נוסע בשם <strong>${username}</strong> ממתין לאישור שלך.`,
+    confirmButtonText: 'צפייה בנסיעות שלי',
+    cancelButtonText: 'סגור',
+    showCancelButton: true,
+    confirmButtonColor: '#2563EB',
+    cancelButtonColor: '#6B7280'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = 'my-trips.html';
+    }
+  });
 }
+
 function checkPassengerApprovalStatusOnHome() {
   const userId = localStorage.getItem("user_id");
   if (!userId) return;
@@ -152,14 +155,19 @@ function checkPassengerApprovalStatusOnHome() {
 }
 
 function showPassengerAlert(eventTitle) {
-  if (document.querySelector(".approved-passenger-alert")) return;
-
-  const alert = document.createElement("div");
-  alert.className = "new-request-alert approved-passenger-alert";
-  alert.innerHTML = `✅ אושרת לנסיעה: <strong>${eventTitle}</strong> — תוכל כעת לשלם`;
-  document.body.appendChild(alert);
-
-  setTimeout(() => {
-    alert.remove();
-  }, 6000);
+  Swal.fire({
+    icon: 'success',
+    title: `אושרת לנסיעה: ${eventTitle}`,
+    text: 'תוכל כעת לשלם ולגשת לנסיעות שלך.',
+    confirmButtonText: 'לנסיעות שלי',
+    cancelButtonText: 'סגור',
+    showCancelButton: true,
+    confirmButtonColor: '#10B981',
+    cancelButtonColor: '#6B7280'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      window.location.href = 'my-trips.html';
+    }
+  });
 }
+
