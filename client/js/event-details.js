@@ -28,57 +28,92 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      drivers.forEach(async driver => {
-        const driverCard = document.createElement("div");
-        driverCard.classList.add("driver-card");
-
-        let status = null;
-
-        try {
-          const checkRes = await fetch(`https://ridematch-a905.onrender.com/check-registration?event_id=${event.id}&driver_user_id=${driver.driver_user_id}&passenger_user_id=${currentUserId}`);
-          const checkData = await checkRes.json();
-          if (checkRes.ok) {
-            status = checkData.status;
-          }
-        } catch (e) {
-          console.error("שגיאה בבדיקת הרשמה מוקדמת:", e);
-        }
-
-        let buttonHTML = "";
-
-        if (status === "paid") {
-          buttonHTML = `<button class="disabled-button" disabled>✅ רשום לנסיעה</button>`;
-        } else if (status === "approved") {
-          buttonHTML = `<button class="pay-button" onclick="startPaymentProcess(this, ${event.id}, ${driver.driver_user_id})">💳 אושרת, שלם בבקשה</button>`;
-        } else if (status === "pending") {
-          buttonHTML = `<button class="disabled-button" disabled>⏳ ממתין לאישור</button>`;
-        } else {
-          buttonHTML = `<button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הירשם לנסיעה</button>`;
-        }
-
-        driverCard.innerHTML = `
-          <h3>${driver.username}</h3>
-          <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
-          <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
-          <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
-          <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
-          <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
-          <div class="driver-actions">
-          <a class="primary-button" href="driver-info.html?user_id=${driver.driver_user_id}">ℹ️ למידע על הנהג</a>
-            ${buttonHTML}
-          </div>
-        `;
-
-        driversListContainer.appendChild(driverCard);
-
-        if (parseInt(currentUserId) === parseInt(driver.driver_user_id)) {
-          checkPendingJoinRequests(event.id, driver.driver_user_id);
-          checkPassengerApprovalStatusOnHome();
-
-        }
+      drivers.forEach(driver => {
+        renderDriverCard(driver, event, currentUserId);
       });
+
+      // ✅ מפעיל את פונקציית החיפוש
+      setupSearch(event, drivers, currentUserId);
     });
 });
+
+function renderDriverCard(driver, event, currentUserId) {
+  const driversListContainer = document.querySelector(".drivers-list");
+  const driverCard = document.createElement("div");
+  driverCard.classList.add("driver-card");
+
+  let status = null;
+
+  fetch(`https://ridematch-a905.onrender.com/check-registration?event_id=${event.id}&driver_user_id=${driver.driver_user_id}&passenger_user_id=${currentUserId}`)
+    .then(res => res.json())
+    .then(checkData => {
+      if (checkData && checkData.status) {
+        status = checkData.status;
+      }
+
+      let buttonHTML = "";
+
+      if (status === "paid") {
+        buttonHTML = `<button class="disabled-button" disabled>✅ רשום לנסיעה</button>`;
+      } else if (status === "approved") {
+        buttonHTML = `<button class="pay-button" onclick="startPaymentProcess(this, ${event.id}, ${driver.driver_user_id})">💳 אושרת, שלם בבקשה</button>`;
+      } else if (status === "pending") {
+        buttonHTML = `<button class="disabled-button" disabled>⏳ ממתין לאישור</button>`;
+      } else {
+        buttonHTML = `<button class="secondary-button" onclick="registerToRide(${event.id}, ${driver.driver_user_id}, this)">🚗 הירשם לנסיעה</button>`;
+      }
+
+      driverCard.innerHTML = `
+        <h3>${driver.username}</h3>
+        <div class="driver-detail"><i>⏰</i><strong>שעת יציאה:</strong> ${driver.departure_time}</div>
+        <div class="driver-detail"><i>🚘</i><strong>רכב:</strong> ${driver.car_model} (${driver.car_color})</div>
+        <div class="driver-detail"><i>📍</i><strong>מקום איסוף:</strong> ${driver.pickup_location}</div>
+        <div class="driver-detail"><i>💸</i><strong>מחיר:</strong> ${driver.price} ₪</div>
+        <div class="driver-detail"><i>🪑</i><strong>מקומות פנויים:</strong> ${driver.seats_available}</div>
+        <div class="driver-actions">
+          <a class="primary-button" href="driver-info.html?user_id=${driver.driver_user_id}">ℹ️ למידע על הנהג</a>
+          ${buttonHTML}
+        </div>
+      `;
+
+      driversListContainer.appendChild(driverCard);
+
+      if (parseInt(currentUserId) === parseInt(driver.driver_user_id)) {
+        checkPendingJoinRequests(event.id, driver.driver_user_id);
+        checkPassengerApprovalStatusOnHome();
+      }
+    })
+    .catch(err => {
+      console.error("שגיאה בבדיקת הרשמה מוקדמת:", err);
+    });
+}
+
+function setupSearch(event, allDrivers, currentUserId) {
+  const searchInput = document.getElementById("searchInput");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", () => {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    const filteredDrivers = allDrivers.filter(driver => {
+      const pickup = driver.pickup_location?.toLowerCase() || "";
+      const title = event.title?.toLowerCase() || "";
+      return pickup.includes(searchTerm) || title.includes(searchTerm);
+    });
+
+    const container = document.querySelector(".drivers-list");
+    container.innerHTML = "";
+
+    if (!filteredDrivers.length) {
+      container.innerHTML = "<p>לא נמצאו נהגים מתאימים.</p>";
+      return;
+    }
+
+    filteredDrivers.forEach(driver => {
+      renderDriverCard(driver, event, currentUserId);
+    });
+  });
+}
 
 function sendMessageToDriver(username) {
   alert(`בעתיד תתווסף מערכת הודעות מול ${username}`);
@@ -210,8 +245,6 @@ function showDriverAlert(username) {
   });
 }
 
-
-
 function checkPassengerApprovalStatusOnHome() {
   const userId = localStorage.getItem("user_id");
   if (!userId) return;
@@ -235,7 +268,7 @@ function checkPassengerApprovalStatusOnHome() {
     } catch (err) {
       console.error("שגיאה בבדיקת סטטוס לנוסע בדף הבית:", err);
     }
-  }, 3000); // כל 3 שניות
+  }, 3000);
 }
 
 function showPassengerAlert(eventTitle) {
@@ -246,7 +279,7 @@ function showPassengerAlert(eventTitle) {
     confirmButtonText: 'מעבר לנסיעות שלי',
     cancelButtonText: 'סגור',
     showCancelButton: true,
-    confirmButtonColor: '#10B981', // ירוק
+    confirmButtonColor: '#10B981',
     cancelButtonColor: '#6B7280'
   }).then((result) => {
     if (result.isConfirmed) {
