@@ -282,7 +282,6 @@ app.post('/approve-passenger', async (req, res) => {
   }
 
   try {
-    // עדכון הסטטוס ל־'paid'
     await pool.query(`
       UPDATE event_passengers
 SET status = 'approved'
