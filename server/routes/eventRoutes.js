@@ -7,7 +7,7 @@ const {
 } = require('../controllers/eventController');
 
 router.get('/events', getAllEvents);
-router.post('/add-event', addEvent);
+router.post('/events', addEvent);
 router.post('/join-ride', joinRide);
 
 module.exports = router;
