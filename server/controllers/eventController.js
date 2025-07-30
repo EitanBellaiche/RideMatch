@@ -16,6 +16,8 @@ async function getAllEvents(req, res) {
 
 async function addEvent(req, res) {
   const { title, type, event_date, time, location } = req.body;
+  console.log("📥 גוף הבקשה שהתקבל:", req.body);
+
   if (!title || !type || !event_date) {
     return res.status(400).json({ message: "יש למלא את כל השדות החיוניים" });
   }
@@ -32,8 +34,10 @@ async function addEvent(req, res) {
     );
     res.status(201).json({ message: "האירוע נוסף בהצלחה!" });
   } catch (err) {
-    res.status(500).json({ message: "שגיאה בהוספת אירוע" });
-  }
+  console.error("❌ שגיאה בהוספת אירוע:", err);  // ← הדפסה מלאה של השגיאה
+  res.status(500).json({ message: "שגיאה בהוספת אירוע" });
+}
+
 }
 
 async function joinRide(req, res) {
