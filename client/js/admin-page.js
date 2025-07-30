@@ -29,17 +29,19 @@ document.addEventListener("DOMContentLoaded", () => {
     addEventBtn.onclick = () => {
         if (eventFormContainer.innerHTML.trim()) return; // כבר פתוח טופס
         eventFormContainer.style.display = "block";
-        eventFormContainer.innerHTML = `
-            <form id="addEventForm" style="display:flex;gap:1em;align-items:center;direction:rtl;">
-                <input name="title" placeholder="כותרת" required />
-                <input name="type" placeholder="סוג" required />
-                <input name="event_date" type="date" required />
-                <input name="time" placeholder="שעה" />
-                <input name="location" placeholder="מיקום" />
-                <button type="submit">שמור</button>
-                <button type="button" id="cancelAddEvent">ביטול</button>
-            </form>
-        `;
+       eventFormContainer.innerHTML = `
+  <form id="addEventForm">
+    <input name="title" placeholder="שם האירוע" required />
+    <input name="location" placeholder="מיקום" required />
+    <input name="time" type="time" required />
+    <input name="type" placeholder="סוג האירוע (football/concert/...)" required />
+    <input name="event_date" type="date" required />
+    <button type="submit">הוסף אירוע</button>
+  </form>
+`;
+
+
+    
         document.getElementById("cancelAddEvent").onclick = () => {
             eventFormContainer.innerHTML = "";
             eventFormContainer.style.display = "none";
