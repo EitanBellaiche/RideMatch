@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <input name="type" placeholder="סוג האירוע (football/concert/...)" required />
     <input name="event_date" type="date" required />
     <button type="submit">הוסף אירוע</button>
+    <button type="button" id="cancelAddEvent">ביטול</button>
   </form>
 `;
 
