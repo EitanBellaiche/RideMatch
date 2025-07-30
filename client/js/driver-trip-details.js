@@ -3,7 +3,7 @@ let isPastTrip = false;
 
 
 function idToColor(id) {
-  let hash = parseInt(id); // ודא שזה מספר
+  let hash = parseInt(id); 
   const r = (hash * 123) % 255;
   const g = (hash * 456) % 255;
   const b = (hash * 789) % 255;

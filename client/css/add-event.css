@@ -59,12 +59,10 @@ form button {
 form button:hover {
   background-color: #16A34A;
 }
-/* כפתור חזרה – מוסתר במסך רגיל */
 .mobile-back-button {
   display: none;
 }
 
-/* הצגה במסך קטן בלבד */
 @media (max-width: 768px) {
   .mobile-back-button {
     display: inline-block;

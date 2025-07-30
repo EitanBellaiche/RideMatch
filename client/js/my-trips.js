@@ -8,11 +8,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const driverSection = document.createElement("section");
   driverSection.className = "trip-section driver-trips";
-  driverSection.innerHTML = "<h2>🔵 נסיעות כנהג</h2>";
+  driverSection.innerHTML = "<h2>נסיעות כנהג</h2>";
 
   const passengerSection = document.createElement("section");
   passengerSection.className = "trip-section passenger-trips";
-  passengerSection.innerHTML = "<h2>🟢 נסיעות כנוסע</h2>";
+  passengerSection.innerHTML = "<h2> נסיעות כנוסע</h2>";
 
   const pastSection = document.createElement("section");
   pastSection.className = "trip-section past-trips";

@@ -140,12 +140,10 @@ button:hover {
 .nav-link:hover {
   background-color: #2563EB;
 }
-/* כפתור חזרה – מוסתר במסך רגיל */
 .mobile-back-button {
   display: none;
 }
 
-/* הצגה במסך קטן בלבד */
 @media (max-width: 768px) {
   .mobile-back-button {
     display: inline-block;

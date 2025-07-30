@@ -70,6 +70,6 @@ form button:hover {
 
 .message {
   margin-top: 1rem;
-  color: #FBBF24; /* כתום רך להודעות */
+  color: #FBBF24; 
   font-size: 0.95rem;
 }

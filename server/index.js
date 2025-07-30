@@ -200,7 +200,7 @@ SET status = 'approved'
       WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
     `, [event_id, driver_user_id, passenger_user_id]);
 
-    // הפחתת מקומות במידה ולא ירדו עדיין
+    
     await pool.query(`
       UPDATE event_drivers
       SET seats_available = seats_available - 1

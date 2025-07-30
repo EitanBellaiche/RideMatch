@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderDriverCard(driver, event, currentUserId);
       });
 
-      // ✅ מפעיל את פונקציית החיפוש
+
       setupSearch(event, drivers, currentUserId);
     });
 });

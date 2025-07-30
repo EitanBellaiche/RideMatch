@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // 🟩 שלב: הוספת נהג חדש בטופס
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 

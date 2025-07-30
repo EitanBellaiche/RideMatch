@@ -239,7 +239,7 @@ body {
 
 .driver-button {
   display: inline-block;
-  background-color: #22C55E; /* ירוק */
+  background-color: #22C55E; 
   color: white;
   padding: 10px 20px;
   font-size: 1rem;
@@ -250,7 +250,7 @@ body {
 }
 
 .driver-button:hover {
-  background-color: #16A34A; /* ירוק כהה יותר */
+  background-color: #16A34A; 
 }
 .driver-actions {
   display: flex;
@@ -265,9 +265,9 @@ body {
   cursor: not-allowed;
   opacity: 0.6;
 }
-/* כפתור תשלום */
+
 .pay-button {
-  background-color: #F59E0B; /* כתום */
+  background-color: #F59E0B; 
   color: white;
   padding: 10px 18px;
   border: none;
@@ -280,12 +280,12 @@ body {
 }
 
 .pay-button:hover {
-  background-color: #D97706; /* כתום כהה יותר */
+  background-color: #D97706; 
 }
 
-/* כפתור מצב רשום */
+
 .disabled-button {
-  background-color: #4B5563; /* אפור כהה */
+  background-color: #4B5563; 
   color: #D1D5DB;
   cursor: not-allowed;
   border: none;
@@ -312,7 +312,7 @@ body {
   animation: slideIn 0.4s ease-out;
 }
 .approved-passenger-alert {
-  background-color: #16A34A; /* ירוק */
+  background-color: #16A34A; 
 }
 
 .primary-button,
@@ -335,7 +335,6 @@ body {
   border: none;
 }
 
-/* סגנון ראשי (כחול) */
 .primary-button {
   background-color: #06B6D4;
 }
@@ -344,7 +343,6 @@ body {
   background-color: #0891B2;
 }
 
-/* סגנון משני (אפור) */
 .secondary-button {
   background-color: #334155;
   color: #E2E8F0;
