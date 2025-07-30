@@ -101,14 +101,14 @@ function checkPendingRequestsOnHome() {
         const pending = await pendingRes.json();
 
         if (pending.length > 0) {
-          showHomeAlert(pending[0].username); // מציג את הראשון בלבד
-          notifiedEvents.add(eventId); // לא נציג שוב את אותו האירוע
+          showHomeAlert(pending[0].username); 
+          notifiedEvents.add(eventId); 
         }
       }
     } catch (err) {
       console.error("שגיאה בבדיקת בקשות ממתינות בדף הבית:", err);
     }
-  }, 3000); // כל 3 שניות
+  }, 3000); 
 }
 
 function showHomeAlert(username) {
@@ -151,7 +151,7 @@ function checkPassengerApprovalStatusOnHome() {
     } catch (err) {
       console.error("שגיאה בבדיקת סטטוס לנוסע בדף הבית:", err);
     }
-  }, 3000); // כל 3 שניות
+  }, 3000); 
 }
 
 function showPassengerAlert(eventTitle) {
