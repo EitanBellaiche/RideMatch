@@ -72,7 +72,31 @@ async function submitReview(req, res) {
   }
 }
 
+async function getReviews(req, res) {
+  const { reviewee_user_id } = req.query;
+
+  if (!reviewee_user_id) {
+    return res.status(400).json({ message: "חסר reviewee_user_id" });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT r.*, u.username AS reviewer_username
+      FROM ride_reviews r
+      JOIN users u ON r.reviewer_user_id = u.id
+      WHERE r.reviewee_user_id = $1
+      ORDER BY r.submitted_at DESC
+    `, [reviewee_user_id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("שגיאה בקבלת ביקורות:", err);
+    res.status(500).json({ message: "שגיאה בקבלת ביקורות" });
+  }
+}
+
 module.exports = {
   getPastTrips,
-  submitReview
+  submitReview,
+  getReviews
 };
