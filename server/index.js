@@ -40,6 +40,10 @@ app.use('/', passengerRoutes);
 const chatRoutes = require('./routes/chatRoutes');
 app.use('/', chatRoutes);
 
+const reviewRoutes = require('./routes/reviewRoutes');
+app.use('/', reviewRoutes);
+
+
 app.get('/past-trips', async (req, res) => {
   const userId = req.query.user_id;
 
@@ -76,42 +80,6 @@ app.get('/past-trips', async (req, res) => {
     res.status(500).json({ message: 'שגיאה בשליפת נסיעות שהסתיימו' });
   }
 });
-
-app.post('/submit-review', async (req, res) => {
-  const {
-    event_id,
-    reviewer_user_id,
-    reviewee_user_id,
-    reviewer_role,
-    rating,
-    comment
-  } = req.body;
-
-  if (!event_id || !reviewer_user_id || !reviewee_user_id || !reviewer_role || !rating) {
-    return res.status(400).json({ message: "חסרים שדות חובה" });
-  }
-
-  try {
-    await pool.query(`
-      INSERT INTO ride_reviews 
-        (event_id, reviewer_user_id, reviewee_user_id, reviewer_role, rating, comment, submitted_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
-    `, [
-      event_id,
-      reviewer_user_id,
-      reviewee_user_id,
-      reviewer_role,
-      rating,
-      comment
-    ]);
-
-    res.status(200).json({ message: "הביקורת נשמרה בהצלחה!" });
-  } catch (err) {
-    console.error("שגיאה בשמירת ביקורת:", err);
-    res.status(500).json({ message: "שגיאה בשרת בשמירת הביקורת" });
-  }
-});
-
 
 app.get("/trip-details", async (req, res) => {
   const { event_id, driver_user_id } = req.query;
