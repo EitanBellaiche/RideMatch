@@ -47,3 +47,39 @@ main {
 .profile-card button:hover {
   background-color: #0891B2;
 }
+#editForm {
+  margin-top: 1.5rem;
+}
+
+#editForm label {
+  display: block;
+  margin-bottom: 1rem;
+  color: #E2E8F0;
+  font-size: 0.95rem;
+}
+
+#editForm input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background-color: #334155;
+  color: #ffffff;
+  margin-top: 0.4rem;
+}
+
+#editForm button[type="submit"] {
+  margin-top: 1rem;
+  padding: 10px 18px;
+  background-color: #22C55E;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#editForm button[type="submit"]:hover {
+  background-color: #16A34A;
+}
