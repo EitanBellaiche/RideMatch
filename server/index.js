@@ -46,6 +46,9 @@ app.use('/', reviewRoutes);
 const tripRoutes = require('./routes/tripRoutes');
 app.use('/', tripRoutes);
 
+const navigationRoutes = require('./routes/navigationRoutes');
+app.use('/api', navigationRoutes);  
+
 
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
