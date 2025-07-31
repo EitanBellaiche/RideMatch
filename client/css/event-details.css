@@ -106,7 +106,7 @@ body {
 
 .driver-button {
   display: inline-block;
-  background-color: #22C55E; /* ירוק */
+  background-color: #22C55E; 
   color: white;
   padding: 10px 20px;
   font-size: 1rem;
@@ -117,7 +117,7 @@ body {
 }
 
 .driver-button:hover {
-  background-color: #16A34A; /* ירוק כהה יותר */
+  background-color: #16A34A; 
 }
 
 body {

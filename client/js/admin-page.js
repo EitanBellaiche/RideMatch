@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const addEventBtn = document.getElementById("addEventBtn");
     const eventFormContainer = document.getElementById("eventFormContainer");
 
-    // הודעה זמנית
     function showMsg(text, color = "#333", timeout = 3000) {
         msg.textContent = text;
         msg.style.color = color;
@@ -25,9 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- טופס הוספת אירוע ---
     addEventBtn.onclick = () => {
-        if (eventFormContainer.innerHTML.trim()) return; // כבר פתוח טופס
+        if (eventFormContainer.innerHTML.trim()) return; 
         eventFormContainer.style.display = "block";
        eventFormContainer.innerHTML = `
   <form id="addEventForm">
@@ -67,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     };
 
-    // מעבר בין טאבים
     tabEvents.onclick = () => {
         tabEvents.classList.add("active");
         tabUsers.classList.remove("active");
@@ -83,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
         loadUsers();
     };
 
-    // --- טעינת אירועים ---
     async function loadEvents(filter = "") {
         eventsTable.innerHTML = "<tr><th>מס' אירוע</th><th>כותרת</th><th>סוג</th><th>תאריך</th><th>שעה</th><th>מיקום</th><th>פעולות</th></tr>";
         try {
@@ -120,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- טעינת משתמשים ---
     async function loadUsers() {
         usersTable.innerHTML = "<tr><th>מס' משתמש</th><th>שם</th><th>אימייל</th><th>טלפון</th><th>פעולות</th></tr>";
         try {
@@ -148,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- מחיקת אירוע ---
     window.deleteEvent = async (id) => {
         if (confirm("האם למחוק אירוע זה?")) {
             try {
@@ -162,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- מחיקת משתמש ---
     window.deleteUser = async (id) => {
         if (confirm("האם למחוק משתמש זה?")) {
             try {
@@ -176,13 +169,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- עריכת משתמש: טופס inline בטבלה ---
     window.editUser = async (id) => {
-        // סגור טופס אחר אם יש
+
         const oldForm = document.getElementById("user-edit-form");
         if (oldForm) oldForm.remove();
 
-        // שלוף פרטי משתמש
         let user;
         try {
             const res = await fetch(`/user/${id}`);
@@ -196,11 +187,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // מצא את השורה בטבלה להצמדת הטופס
         const row = [...usersTable.rows].find(r => r.cells[0] && Number(r.cells[0].textContent) === Number(id));
         if (!row) return;
 
-        // צור טופס עריכה
         const form = document.createElement("tr");
         form.id = "user-edit-form";
         form.innerHTML = `
@@ -216,7 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         row.parentNode.insertBefore(form, row.nextSibling);
 
-        // האזנה לטופס
         form.querySelector("form").onsubmit = async (e) => {
             e.preventDefault();
             const formData = Object.fromEntries(new FormData(e.target));
@@ -238,13 +226,11 @@ document.addEventListener("DOMContentLoaded", () => {
         form.querySelector("#cancelEditUser").onclick = () => form.remove();
     };
 
-    // --- עריכת אירוע: טופס inline בטבלה ---
     window.editEvent = async (id) => {
-        // סגור טופס עריכה קודם
+
         const oldForm = document.getElementById("event-edit-form");
         if (oldForm) oldForm.remove();
 
-        // שלוף פרטי אירוע
         let event;
         try {
             const res = await fetch(`/events/${id}`);
@@ -258,11 +244,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // מצא שורת הטבלה להצמדת טופס
         const row = [...eventsTable.rows].find(r => r.cells[0] && Number(r.cells[0].textContent) === Number(id));
         if (!row) return;
 
-        // צור טופס עריכה
         const form = document.createElement("tr");
         form.id = "event-edit-form";
         form.innerHTML = `
@@ -280,7 +264,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         row.parentNode.insertBefore(form, row.nextSibling);
 
-        // האזנה לטופס
         form.querySelector("form").onsubmit = async (e) => {
             e.preventDefault();
             const formData = Object.fromEntries(new FormData(e.target));
@@ -302,7 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
         form.querySelector("#cancelEditEvent").onclick = () => form.remove();
     };
 
-    // --- חיפוש בזמן אמת ---
     if (searchInput) {
         searchInput.addEventListener("input", (e) => {
             const filter = e.target.value.trim();
@@ -310,6 +292,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ברירת מחדל - טען אירועים
     loadEvents();
 });

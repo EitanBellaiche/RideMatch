@@ -165,7 +165,7 @@ function renderReviewForm() {
           event_id: eventId,
           reviewer_user_id: userId,
           reviewee_user_id: driverUserId,
-          reviewer_role: 'passenger', // הוספנו שזה מצד נוסע
+          reviewer_role: 'passenger', 
           rating,
           comment
         })
