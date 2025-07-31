@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const {
-  deleteUser
+    deleteUser,
+    getUserById,
+    getAllUsers,
+    updateUser
+
 } = require('../controllers/userController');
 
 router.delete('/users/:id', deleteUser);
