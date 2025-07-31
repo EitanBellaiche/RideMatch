@@ -78,14 +78,7 @@ async function joinRide(req, res) {
        VALUES ($1, $2, $3, 'pending')`,
       [event_id, driver_user_id, passenger_user_id]
     );
-
-    await pool.query(
-      `UPDATE event_drivers 
-       SET seats_available = seats_available - 1 
-       WHERE event_id = $1 AND user_id = $2`,
-      [event_id, driver_user_id]
-    );
-
+    
     res.status(200).json({ message: "נרשמת בהצלחה לנסיעה!" });
   } catch (err) {
     console.error("שגיאה בהרשמה לנסיעה:", err);

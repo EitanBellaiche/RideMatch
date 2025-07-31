@@ -29,31 +29,37 @@ async function getPassengerTrips(req, res) {
 }
 
 async function approvePassenger(req, res) {
-    const { event_id, driver_user_id, passenger_user_id } = req.body;
+  const { event_id, driver_user_id, passenger_user_id } = req.body;
 
-    if (!event_id || !driver_user_id || !passenger_user_id) {
-        return res.status(400).json({ message: "Missing fields" });
-    }
+  if (!event_id || !driver_user_id || !passenger_user_id) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
 
-    try {
-        await pool.query(`
+  try {
+    // אשר רק אם הנוסע עדיין במצב pending
+    const updateRes = await pool.query(`
       UPDATE event_passengers
       SET status = 'approved'
-      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3
+      WHERE event_id = $1 AND driver_user_id = $2 AND passenger_user_id = $3 AND status = 'pending'
     `, [event_id, driver_user_id, passenger_user_id]);
 
-        await pool.query(`
+    if (updateRes.rowCount === 0) {
+      return res.status(409).json({ message: "הנוסע כבר אושר או לא נמצא במצב המתאים" });
+    }
+
+    await pool.query(`
       UPDATE event_drivers
       SET seats_available = seats_available - 1
       WHERE event_id = $1 AND user_id = $2 AND seats_available > 0
     `, [event_id, driver_user_id]);
 
-        res.status(200).json({ message: "נוסע אושר בהצלחה" });
-    } catch (err) {
-        console.error("שגיאה באישור נוסע:", err);
-        res.status(500).json({ message: "שגיאה בשרת" });
-    }
+    res.status(200).json({ message: "נוסע אושר בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה באישור נוסע:", err);
+    res.status(500).json({ message: "שגיאה בשרת" });
+  }
 }
+
 
 async function checkRegistration(req, res) {
     const { event_id, driver_user_id, passenger_user_id } = req.query;
