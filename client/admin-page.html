@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="he">
+
 <head>
   <meta charset="UTF-8" />
   <title>דף ניהול</title>
   <link rel="stylesheet" href="css/admin-page.css">
 </head>
+
 <body>
   <main class="admin-container">
-    <h2>דף ניהול</h2>
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>דף ניהול</h2>
+      <a href="login.html" class="logout-link">התנתקות</a>
+    </header>
+
     <section class="tabs">
       <button id="tab-events">אירועים</button>
       <button id="tab-users">משתמשים</button>
     </section>
+
     <section id="section-events">
       <button id="addEventBtn"> + הוסף אירוע</button>
       <section class="search-container">
@@ -20,13 +27,17 @@
       <section id="eventFormContainer" style="display:none"></section>
       <table id="eventsTable"></table>
     </section>
+
     <section id="section-users" style="display:none;">
-      <!-- <button id="addUserBtn">הוסף משתמש</button> -->
+
       <section id="userFormContainer" style="display:none"></section>
       <table id="usersTable"></table>
     </section>
+
     <section id="msg"></section>
   </main>
+
   <script src="js/admin-page.js"></script>
 </body>
+
 </html>
