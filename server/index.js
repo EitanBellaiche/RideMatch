@@ -517,17 +517,6 @@ app.get('/user/:id', async (req, res) => {
   }
 });
 
-// בקובץ index.js של השרת
-app.delete('/events/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    // כדאי למחוק גם קשורים (למשל event_drivers/event_passengers)
-    await pool.query('DELETE FROM events WHERE id = $1', [id]);
-    res.json({ message: "האירוע נמחק בהצלחה" });
-  } catch (err) {
-    res.status(500).json({ message: "שגיאה במחיקת אירוע" });
-  }
-});
 
 app.get('/users', async (req, res) => {
   try {
@@ -630,38 +619,6 @@ app.put('/users/:id', async (req, res) => {
     res.status(500).json({ message: "שגיאה בעדכון משתמש" });
   }
 });
-
-app.put('/events/:id', async (req, res) => {
-  const eventId = req.params.id;
-  const { title, type, event_date, time, location } = req.body;
-  try {
-    await pool.query(
-      `UPDATE events
-       SET title = $1, type = $2, event_date = $3, time = $4, location = $5
-       WHERE id = $6`,
-      [title, type, event_date, time, location, eventId]
-    );
-    res.json({ message: "האירוע עודכן בהצלחה" });
-  } catch (err) {
-    console.error("שגיאה בעדכון אירוע:", err);
-    res.status(500).json({ message: "שגיאה בעדכון אירוע" });
-  }
-});
-
-app.get('/events/:id', async (req, res) => {
-  const eventId = req.params.id;
-  try {
-    const result = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "אירוע לא נמצא" });
-    }
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ message: "שגיאה בשליפת אירוע" });
-  }
-});
-
-
 
 app.use(express.static(path.join(__dirname, '..', 'client')));
 

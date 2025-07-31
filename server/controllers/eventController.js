@@ -92,9 +92,53 @@ async function joinRide(req, res) {
     res.status(500).json({ message: "שגיאה בשרת" });
   }
 }
+async function deleteEvent(req, res) {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM events WHERE id = $1', [id]);
+    res.json({ message: "האירוע נמחק בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה במחיקת אירוע:", err);
+    res.status(500).json({ message: "שגיאה במחיקת אירוע" });
+  }
+}
+async function getEventById(req, res) {
+  const eventId = req.params.id;
+  try {
+    const result = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "אירוע לא נמצא" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("שגיאה בשליפת אירוע:", err);
+    res.status(500).json({ message: "שגיאה בשליפת אירוע" });
+  }
+}
+async function updateEvent(req, res) {
+  const eventId = req.params.id;
+  const { title, type, event_date, time, location } = req.body;
+  try {
+    await pool.query(
+      `UPDATE events
+       SET title = $1, type = $2, event_date = $3, time = $4, location = $5
+       WHERE id = $6`,
+      [title, type, event_date, time, location, eventId]
+    );
+    res.json({ message: "האירוע עודכן בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בעדכון אירוע:", err);
+    res.status(500).json({ message: "שגיאה בעדכון אירוע" });
+  }
+}
+
+
 
 module.exports = {
   getAllEvents,
   addEvent,
-  joinRide
+  joinRide,
+  deleteEvent,
+  updateEvent,
+  getEventById
 };
