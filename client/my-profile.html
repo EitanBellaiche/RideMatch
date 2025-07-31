@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="he">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,16 +16,24 @@
       <a href="my-profile.html">הפרופיל שלי</a>
     </nav>
   </header>
+
   <main>
     <section class="profile-section">
       <h2>👤 פרטי המשתמש</h2>
       <article class="profile-card">
-        <button>עריכת פרטים</button>
+        <div id="user-details"></div>
+        <button id="editBtn">עריכת פרטים</button>
+
+        <form id="editForm" style="display: none;">
+          <label>שם משתמש: <input type="text" id="editUsername" required /></label><br>
+          <label>אימייל: <input type="email" id="editEmail" required /></label><br>
+          <label>טלפון: <input type="tel" id="editPhone" required /></label><br>
+          <button type="submit">שמירה</button>
+        </form>
       </article>
     </section>
   </main>
+
+  <script src="js/my-profile.js"></script>
 </body>
-<script src="js/my-profile.js"></script>
-
-
 </html>
